@@ -165,7 +165,10 @@ export function SearchBar({
 
         {/* Suggestions Popover */}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-64 overflow-y-auto rounded-2xl border border-border bg-card p-1.5 shadow-xl backdrop-blur-md">
+          <div
+            style={{ backgroundColor: "var(--card, #ffffff)" }}
+            className="absolute left-0 right-0 sm:left-0 sm:right-auto sm:min-w-[320px] top-full z-50 mt-2 max-h-64 overflow-y-auto rounded-2xl border border-border bg-card p-1.5 shadow-2xl"
+          >
             <div className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               Location suggestions
             </div>

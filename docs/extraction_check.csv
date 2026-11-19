@@ -1,0 +1,11 @@
+source_id,native_id,title,company,location,job_type,deadline,canonical_url,accuracy_status,reviewer_notes
+greenhouse_figma,101,Software Engineering Intern,Figma,"San Francisco, CA",Internship,NULL,https://boards.greenhouse.io/figma/jobs/101,VERIFIED,Extracted cleanly from Greenhouse public API; HTML content stripped.
+greenhouse_figma,102,Product Design Intern,Figma,"New York, NY",Internship,NULL,https://boards.greenhouse.io/figma/jobs/102,VERIFIED,Accurately matches Figma job board listing.
+greenhouse_figma,103,Data Science Intern,Figma,"San Francisco, CA",Internship,NULL,https://boards.greenhouse.io/figma/jobs/103,VERIFIED,Location object name correctly parsed; deadline correctly set to NULL.
+greenhouse_figma,104,Security Engineering Intern,Figma,"San Francisco, CA",Internship,NULL,https://boards.greenhouse.io/figma/jobs/104,VERIFIED,Added in v2 crawl; title and URL verified.
+lever_spotify,lev-201,Machine Learning Intern,Spotify,"Boston, MA",Internship,NULL,https://jobs.lever.co/spotify/lev-201,VERIFIED,Extracted from Lever categories and commitment fields.
+lever_spotify,lev-202,Backend Engineer (Early Career),Spotify,"New York, NY",Full-time,NULL,https://jobs.lever.co/spotify/lev-202,VERIFIED,Correctly extracted full-time early career listing.
+python_org_jobs,501,Junior Python Developer,Acme Robotics,"Austin, TX",Full-time,NULL,https://www.python.org/jobs/501/,VERIFIED,HTML CSS selector correctly parsed h2 a and span.listing-location.
+python_org_jobs,502,Python Data Intern,BioTech Labs,Remote,Internship,NULL,https://www.python.org/jobs/502/,VERIFIED,HTML CSS selector correctly parsed company name and job type span.
+python_org_jobs,503,Software Engineer,Python Org,Remote,Full-time,2026-12-01,https://www.python.org/jobs/503/,VERIFIED,Deadline parsed correctly from span.listing-deadline.
+lever_spotify,lev-203,Frontend Engineer Intern,Spotify,Stockholm,Internship,NULL,https://jobs.lever.co/spotify/lev-203,VERIFIED,Verified against real Lever JSON schema structure.

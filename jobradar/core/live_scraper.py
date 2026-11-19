@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from jobradar.core.config import load_settings
 from jobradar.core.frontend_mapper import sync_to_frontend
-from jobradar.core.normalizer import generate_content_hash, normalize_record
+from jobradar.core.normalizer import compute_content_hash
 from jobradar.db.models import ListingModel, RunModel, SnapshotModel, SourceModel, utc_now
 
 logger = logging.getLogger("jobradar.live_scraper")
@@ -140,14 +140,13 @@ def scrape_jobs_for_location(location: str, session: Session) -> Dict[str, Any]:
                     continue
 
                 entity_id = f"{src_id}:{native_id}"
-                c_hash = generate_content_hash(
-                    title=title,
-                    company=company_name,
-                    location=loc_name,
-                    job_type=None,
-                    canonical_url=job_url,
-                    description=snippet,
-                )
+                c_hash = compute_content_hash({
+                    "title": title,
+                    "company": company_name,
+                    "location": loc_name,
+                    "job_type": None,
+                    "deadline": None,
+                })
 
                 existing = session.query(ListingModel).filter(ListingModel.entity_id == entity_id).first()
                 if not existing:

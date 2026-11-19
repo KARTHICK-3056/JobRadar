@@ -153,7 +153,7 @@ export const companies: Company[] = [
   {
     "id": "pycorp",
     "name": "PyCorp",
-    "tone": 3,
+    "tone": 1,
     "industry": "Technology",
     "size": "500+ people",
     "location": "Austin, TX",
@@ -162,7 +162,7 @@ export const companies: Company[] = [
   {
     "id": "techcorp",
     "name": "TechCorp",
-    "tone": 3,
+    "tone": 2,
     "industry": "Technology",
     "size": "500+ people",
     "location": "Seattle, WA",
@@ -468,7 +468,17 @@ export const levels: Level[] = ["Junior", "Mid", "Senior", "Lead"];
 
 export function getCompany(id: string): Company {
   const c = companies.find((c) => c.id === id);
-  if (!c) throw new Error(`Unknown company ${id}`);
+  if (!c) {
+    return {
+      id,
+      name: id.charAt(0).toUpperCase() + id.slice(1),
+      tone: 3,
+      industry: "Technology",
+      size: "500+ people",
+      location: "India",
+      about: "Verified organization tracked through JobRadar.",
+    };
+  }
   return c;
 }
 
@@ -498,15 +508,18 @@ export interface JobFilters {
 
 export function filterJobs(list: Job[], f: JobFilters): Job[] {
   const q = f.q?.trim().toLowerCase();
-  const loc = f.location?.trim().toLowerCase();
+  const rawLoc = f.location?.trim().toLowerCase();
+  const loc = rawLoc === "all" || rawLoc === "" ? undefined : rawLoc;
+
   return list.filter((job) => {
-    const company = getCompany(job.companyId);
+    const company = companies.find((c) => c.id === job.companyId);
+    const companyName = company ? company.name.toLowerCase() : "";
     if (q) {
-      const hay = [job.title, company.name, job.category, ...job.tags].join(" ").toLowerCase();
+      const hay = [job.title, companyName, job.category, ...job.tags].join(" ").toLowerCase();
       if (!hay.includes(q)) return false;
     }
     if (loc) {
-      const isIndiaQuery = loc === "india" || loc.includes("india");
+      const isIndiaQuery = loc === "india" || loc.includes("india") || loc === "all india";
       const isChennaiQuery = loc.includes("chennai") || loc.includes("madras") || loc.includes("tamil");
       const isBangaloreQuery = loc.includes("bangalore") || loc.includes("bengaluru") || loc.includes("karnataka");
       const isHyderabadQuery = loc.includes("hyderabad") || loc.includes("telangana");
@@ -521,7 +534,7 @@ export function filterJobs(list: Job[], f: JobFilters): Job[] {
       ];
       const jobLoc = job.location.toLowerCase();
       let matchesLoc = jobLoc.includes(loc) || (job.remote && "remote".includes(loc));
-      if (isIndiaQuery && indiaKeywords.some((k) => jobLoc.includes(k))) {
+      if (isIndiaQuery && (indiaKeywords.some((k) => jobLoc.includes(k)) || job.remote)) {
         matchesLoc = true;
       }
       if (isChennaiQuery && (jobLoc.includes("chennai") || jobLoc.includes("tamil") || jobLoc.includes("coimbatore") || jobLoc.includes("vellore"))) {
@@ -544,7 +557,7 @@ export function filterJobs(list: Job[], f: JobFilters): Job[] {
       }
       if (!matchesLoc) return false;
     }
-    if (f.category && job.category !== f.category) return false;
+    if (f.category && job.category.toLowerCase() !== f.category.toLowerCase()) return false;
     if (f.types?.length && !f.types.includes(job.type)) return false;
     if (f.levels?.length && !f.levels.includes(job.level)) return false;
     if (f.remoteOnly && !job.remote) return false;

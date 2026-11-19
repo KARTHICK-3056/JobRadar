@@ -126,16 +126,13 @@ function Index() {
               defaultLocation={selectedLocation === "All India" ? "India" : selectedLocation}
               className="relative z-30"
               onSearch={(q, location) => {
-                if (q) {
-                  navigate({
-                    to: "/jobs",
-                    search: { q, location: location || undefined },
-                  });
-                } else if (location) {
-                  setSelectedLocation(location);
-                  const el = document.getElementById("latest-opportunities");
-                  if (el) el.scrollIntoView({ behavior: "smooth" });
-                }
+                navigate({
+                  to: "/jobs",
+                  search: {
+                    q: q || undefined,
+                    location: location || "India",
+                  },
+                });
               }}
             />
             <div className="relative z-10 mt-5 flex flex-wrap items-center justify-center gap-2 text-sm">

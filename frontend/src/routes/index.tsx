@@ -8,10 +8,10 @@ import { categories, companies, jobs } from "@/lib/jobs";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "hireline — Find work that fits your life" },
-      { name: "description", content: "Search thousands of roles from thoughtful companies. Simple filters, honest salaries, no noise." },
-      { property: "og:title", content: "hireline — Find work that fits your life" },
-      { property: "og:description", content: "Search roles from thoughtful companies. Simple filters, honest salaries, no noise." },
+      { title: "JobRadar — Versioned Job & Internship Tracking" },
+      { name: "description", content: "Search and track verified roles across India. Real LPA compensation, live change-tracking, zero noise." },
+      { property: "og:title", content: "JobRadar — Versioned Job & Internship Tracking" },
+      { property: "og:description", content: "Search and track verified roles across India. Real LPA compensation, live change-tracking, zero noise." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

@@ -1,29 +1,26 @@
-# Welcome to your Lovable project
+# JobRadar Frontend
 
-This project was built with [Lovable](https://lovable.dev).
+Modern web interface for **JobRadar**: a versioned change-tracking and discovery system for student internship and job listings.
 
-## Build with Lovable
-
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+## Features
+- **Live Search & Autocomplete**: Autocomplete suggestions for Indian tech hubs (Bengaluru, Chennai, Pune, Hyderabad, Delhi-NCR, Mumbai, etc.).
+- **On-Demand Web Scraping**: Trigger live ATS crawlers directly from the UI for specific cities.
+- **LPA Salary Insights**: Transparent Indian tech salary ranges formatted in Lakhs Per Annum (LPA).
+- **Responsive & Accessible**: Clean layout with mobile drawer navigation, dark/light theme support, and bookmarking.
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+```bash
+cd frontend
+npm install
 npm run dev
 ```
 
-## Built with
+The frontend runs locally on `http://localhost:8080/`.
 
-- TanStack Start
+## Stack
+- TanStack Start & TanStack Router
+- React 19
 - TypeScript
-- React
-- Tailwind CSS
+- Tailwind CSS v4
+- Lucide React & Sonner

@@ -31,7 +31,7 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    # Enable CORS for the Lovable dev origin and local dev servers
+    # Enable CORS for local dev servers and clients
     origins = settings.cors_origins or ["*"]
     app.add_middleware(
         CORSMiddleware,

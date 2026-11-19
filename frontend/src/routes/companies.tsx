@@ -6,10 +6,10 @@ import { companies, jobs } from "@/lib/jobs";
 export const Route = createFileRoute("/companies")({
   head: () => ({
     meta: [
-      { title: "Companies hiring — hireline" },
-      { name: "description", content: "Discover thoughtful companies that are hiring right now, and see their open roles." },
-      { property: "og:title", content: "Companies hiring — hireline" },
-      { property: "og:description", content: "Discover thoughtful companies that are hiring right now." },
+      { title: "Companies hiring — JobRadar" },
+      { name: "description", content: "Discover verified companies that are hiring right now, and track their open roles." },
+      { property: "og:title", content: "Companies hiring — JobRadar" },
+      { property: "og:description", content: "Discover verified companies that are hiring right now." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

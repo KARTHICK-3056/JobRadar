@@ -2,7 +2,7 @@
 
 JobRadar is an ethical, deterministic, and compliance-first backend data pipeline and REST API designed to monitor student internship and early-career job boards. It tracks listings, detects field-level mutations (title, location, deadline changes), confirms removals, and logs complete version histories while guaranteeing zero false alerts on formatting-only updates.
 
-The backend exposes a FastAPI REST API built to interface directly with the Lovable React/Vite frontend.
+The backend exposes a FastAPI REST API built to interface directly with the JobRadar React/Vite frontend.
 
 ---
 
@@ -48,7 +48,7 @@ flowchart TD
     subgraph Delivery["API & Scheduling Engine"]
         SCHED["APScheduler Job Runner"]
         API["FastAPI REST Endpoints (/api)"]
-        UI["Lovable React/Vite Frontend"]
+        UI["JobRadar React/Vite Frontend"]
     end
 
     GH --> Compliance
@@ -259,7 +259,7 @@ The `HtmlAdapter` uses BeautifulSoup4 backed by `lxml`:
 
 ## 9. API Reference
 
-All endpoints conform strictly to the Lovable React/Vite frontend specification under base path `/api`:
+All endpoints conform strictly to the JobRadar frontend specification under base path `/api`:
 
 | Method | Path | Description |
 |---|---|---|

@@ -35,10 +35,10 @@ export const Route = createFileRoute("/jobs/")({
   }),
   head: () => ({
     meta: [
-      { title: "Find jobs — hireline" },
-      { name: "description", content: "Search and filter open roles by field, job type, level, salary and location." },
-      { property: "og:title", content: "Find jobs — hireline" },
-      { property: "og:description", content: "Search and filter open roles by field, job type, level, salary and location." },
+      { title: "Find jobs — JobRadar" },
+      { name: "description", content: "Search and filter verified roles by field, job type, level, salary (LPA) and location across India." },
+      { property: "og:title", content: "Find jobs — JobRadar" },
+      { property: "og:description", content: "Search and filter verified roles by field, job type, level, salary (LPA) and location across India." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

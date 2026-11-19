@@ -1,4 +1,4 @@
-"""Mapper bridging JobRadar SQLite models to frontend_new (hireline) models."""
+"""Mapper bridging JobRadar SQLite models to frontend models."""
 import json
 import re
 from datetime import datetime, timezone

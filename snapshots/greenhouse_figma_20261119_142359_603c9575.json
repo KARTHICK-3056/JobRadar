@@ -1,0 +1,28 @@
+{
+  "jobs": [
+    {
+      "id": 101,
+      "title": "Software Engineering Intern",
+      "updated_at": "2026-09-01T10:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/figma/jobs/101",
+      "location": { "name": "San Francisco, CA" },
+      "content": "<p>Join Figma as a Software Engineering Intern! Work with React and TypeScript.</p>"
+    },
+    {
+      "id": 102,
+      "title": "Product Design Intern",
+      "updated_at": "2026-09-02T10:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/figma/jobs/102",
+      "location": { "name": "New York, NY" },
+      "content": "<p>Design intuitive user interfaces for creative tooling.</p>"
+    },
+    {
+      "id": 103,
+      "title": "Data Science Intern",
+      "updated_at": "2026-09-03T10:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/figma/jobs/103",
+      "location": { "name": "San Francisco, CA" },
+      "content": "<p>Analyze product metrics and model collaborative workflows.</p>"
+    }
+  ]
+}

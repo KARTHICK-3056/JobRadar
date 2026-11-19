@@ -7,9 +7,9 @@ import { useSavedJobs } from "@/lib/use-saved-jobs";
 export const Route = createFileRoute("/saved")({
   head: () => ({
     meta: [
-      { title: "Saved jobs — hireline" },
+      { title: "Saved jobs — JobRadar" },
       { name: "description", content: "The roles you've saved to come back to later." },
-      { property: "og:title", content: "Saved jobs — hireline" },
+      { property: "og:title", content: "Saved jobs — JobRadar" },
       { property: "og:description", content: "The roles you've saved to come back to later." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

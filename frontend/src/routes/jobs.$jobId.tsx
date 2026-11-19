@@ -15,9 +15,9 @@ export const Route = createFileRoute("/jobs/$jobId")({
     return { job, company: getCompany(job.companyId) };
   },
   head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "Job not found — hireline" }, { name: "robots", content: "noindex" }] };
+    if (!loaderData) return { meta: [{ title: "Job not found — JobRadar" }, { name: "robots", content: "noindex" }] };
     const { job, company } = loaderData;
-    const title = `${job.title} at ${company.name} — hireline`;
+    const title = `${job.title} at ${company.name} — JobRadar`;
     return {
       meta: [
         { title },

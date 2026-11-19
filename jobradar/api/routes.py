@@ -1,4 +1,4 @@
-"""FastAPI API routes matching the Lovable frontend contract exactly."""
+"""FastAPI API routes for JobRadar listings, runs, sources, and tracker."""
 from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path

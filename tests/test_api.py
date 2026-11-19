@@ -125,10 +125,10 @@ def client_with_db():
 
 
 def test_cors_headers(client_with_db):
-    """Test CORS headers for Lovable frontend integration."""
+    """Test CORS headers for frontend integration."""
     resp = client_with_db.get(
         "/api/summary",
-        headers={"Origin": "https://lovable.dev"},
+        headers={"Origin": "http://localhost:8080"},
     )
     assert resp.status_code == 200
     assert "access-control-allow-origin" in resp.headers

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, Bookmark } from "lucide-react";
+import { Menu, X, Bookmark, Radar } from "lucide-react";
 import { useSavedJobs } from "@/lib/use-saved-jobs";
 import { cn } from "@/lib/utils";
 
@@ -17,11 +17,11 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur-lg">
       <div className="container-page flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary font-display text-lg text-highlight">
-            h
+        <Link to="/" className="flex items-center gap-2.5" onClick={() => setOpen(false)}>
+          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-highlight shadow-sm">
+            <Radar className="size-4.5" />
           </span>
-          <span className="text-lg font-semibold tracking-tight">hireline</span>
+          <span className="text-lg font-bold tracking-tight">JobRadar</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Main">

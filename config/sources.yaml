@@ -63,6 +63,28 @@ sources:
     filter_keywords:
       enabled: false
 
+  - id: "lever_paytm"
+    name: "Paytm (Lever India)"
+    type: "lever"
+    company: "paytm"
+    base_url: "https://api.lever.co/v0/postings/paytm?mode=json"
+    refresh_interval_minutes: 60
+    enabled: true
+    mentor_approved: true
+    filter_keywords:
+      enabled: false
+
+  - id: "greenhouse_fourkites"
+    name: "FourKites (Greenhouse Chennai)"
+    type: "greenhouse"
+    board_token: "fourkites"
+    base_url: "https://boards-api.greenhouse.io/v1/boards/fourkites/jobs?content=true"
+    refresh_interval_minutes: 60
+    enabled: true
+    mentor_approved: true
+    filter_keywords:
+      enabled: false
+
   - id: "python_org_jobs"
     name: "Python Software Foundation Job Board"
     type: "html"

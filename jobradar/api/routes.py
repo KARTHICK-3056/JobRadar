@@ -440,10 +440,27 @@ def get_metrics():
 
 
 @router.get("/jobs")
-def get_jobs_for_frontend(db: Session = Depends(get_db)):
-    """Retrieve jobs mapped to the frontend contract."""
+def get_jobs_for_frontend(
+    location: Optional[str] = Query(None),
+    live: bool = Query(False),
+    db: Session = Depends(get_db),
+):
+    """Retrieve jobs mapped to the frontend contract with optional on-demand scraping."""
+    if live and location:
+        from jobradar.core.live_scraper import scrape_jobs_for_location
+        scrape_jobs_for_location(location, db)
     from jobradar.core.frontend_mapper import get_frontend_jobs
     return get_frontend_jobs(db)
+
+
+@router.post("/scrape/location")
+def scrape_location_endpoint(
+    location: str = Query(..., description="Target city/location to live scrape"),
+    db: Session = Depends(get_db),
+):
+    """Live scrape career boards for a city like Chennai on demand."""
+    from jobradar.core.live_scraper import scrape_jobs_for_location
+    return scrape_jobs_for_location(location, db)
 
 
 @router.get("/companies")
@@ -451,4 +468,5 @@ def get_companies_for_frontend(db: Session = Depends(get_db)):
     """Retrieve companies mapped to the frontend contract."""
     from jobradar.core.frontend_mapper import get_frontend_companies
     return get_frontend_companies(db)
+
 

@@ -53,9 +53,9 @@ function Index() {
             </p>
           </div>
 
-          <div className="animate-rise mx-auto mt-10 max-w-3xl [animation-delay:240ms]">
-            <SearchBar defaultLocation="India" />
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-sm">
+          <div className="animate-rise relative z-30 mx-auto mt-10 max-w-3xl [animation-delay:240ms]">
+            <SearchBar defaultLocation="India" className="relative z-30" />
+            <div className="relative z-10 mt-5 flex flex-wrap items-center justify-center gap-2 text-sm">
               <span className="text-muted-foreground">Popular:</span>
               {popular.map((term) => (
                 <Link
@@ -75,7 +75,7 @@ function Index() {
           </div>
 
           {/* Trusted by */}
-          <div className="animate-rise mx-auto mt-16 max-w-4xl [animation-delay:320ms]">
+          <div className="animate-rise relative z-10 mx-auto mt-16 max-w-4xl [animation-delay:320ms]">
             <p className="text-center text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
               Hiring now
             </p>

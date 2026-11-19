@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { SlidersHorizontal, X, SearchX } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { SlidersHorizontal, X, SearchX, Sparkles, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 import { SearchBar } from "@/components/site/search-bar";
 import { JobCard } from "@/components/site/job-card";
 import { categories, filterJobs, jobs, jobTypes, levels, type JobType, type Level } from "@/lib/jobs";
@@ -45,12 +46,37 @@ export const Route = createFileRoute("/jobs/")({
   component: JobsPage,
 });
 
-const salarySteps = [0, 50, 80, 100, 130];
+const salarySteps = [0, 6, 10, 15, 25, 40];
 
 function JobsPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [showFilters, setShowFilters] = useState(false);
+  const [isScraping, setIsScraping] = useState(false);
+  const [scrapeMessage, setScrapeMessage] = useState<string | null>(null);
+
+  // Trigger real-time live web scraping when selecting specific Indian cities like Chennai
+  useEffect(() => {
+    if (search.location && search.location !== "all") {
+      const loc = search.location.trim();
+      setIsScraping(true);
+      fetch(`/api/scrape/location?location=${encodeURIComponent(loc)}`, { method: "POST" })
+        .then((res) => {
+          if (!res.ok) return null;
+          return res.json();
+        })
+        .then((data) => {
+          if (data && data.matching_count !== undefined) {
+            setScrapeMessage(`Scraped live: ${data.matching_count} verified opportunities in ${loc}`);
+            toast.success(`Live web scraper gathered latest real jobs for ${loc}!`);
+          }
+        })
+        .catch(() => {})
+        .finally(() => setIsScraping(false));
+    } else {
+      setScrapeMessage(null);
+    }
+  }, [search.location]);
 
   const update = (patch: Partial<JobsSearch>) =>
     navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true, resetScroll: false });
@@ -83,7 +109,7 @@ function JobsPage() {
   };
 
   const clearAll = () =>
-    navigate({ search: { q: search.q, location: search.location }, replace: true, resetScroll: false });
+    navigate({ search: { q: search.q, location: "all" }, replace: true, resetScroll: false });
 
   return (
     <div className="container-page pt-10 md:pt-14">
@@ -158,7 +184,7 @@ function JobsPage() {
               </div>
             </FilterGroup>
 
-            <FilterGroup title="Minimum salary">
+            <FilterGroup title="Minimum salary (LPA)">
               <div className="grid grid-cols-3 gap-2">
                 {salarySteps.map((s) => (
                   <Pill
@@ -166,7 +192,7 @@ function JobsPage() {
                     active={(search.minSalary ?? 0) === s}
                     onClick={() => update({ minSalary: s || undefined })}
                   >
-                    {s === 0 ? "Any" : `$${s}k+`}
+                    {s === 0 ? "Any" : `₹${s} LPA+`}
                   </Pill>
                 ))}
               </div>
@@ -177,10 +203,24 @@ function JobsPage() {
         {/* Results */}
         <section aria-live="polite">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{results.length}</span>{" "}
-              {results.length === 1 ? "job" : "jobs"} found
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">{results.length}</span>{" "}
+                {results.length === 1 ? "job" : "jobs"} found
+              </p>
+              {isScraping && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                  <RefreshCw className="size-3 animate-spin" />
+                  Scraping web live for {search.location}...
+                </span>
+              )}
+              {!isScraping && scrapeMessage && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  <Sparkles className="size-3" />
+                  {scrapeMessage}
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowFilters((s) => !s)}
@@ -221,7 +261,7 @@ function JobsPage() {
               {search.levels?.map((l) => (
                 <ActiveTag key={l} onRemove={() => update({ levels: toggleIn(search.levels, l) })}>{l}</ActiveTag>
               ))}
-              {search.minSalary && <ActiveTag onRemove={() => update({ minSalary: undefined })}>${search.minSalary}k+</ActiveTag>}
+              {search.minSalary && <ActiveTag onRemove={() => update({ minSalary: undefined })}>₹{search.minSalary} LPA+</ActiveTag>}
             </div>
           )}
 
@@ -236,11 +276,25 @@ function JobsPage() {
               <span className="flex size-12 items-center justify-center rounded-full bg-muted">
                 <SearchX className="size-5" />
               </span>
-              <h3 className="mt-4 text-lg font-semibold">No jobs match yet</h3>
-              <p className="mt-1 max-w-sm text-muted-foreground">Try a broader keyword or remove a filter or two.</p>
-              <Link to="/jobs" className="mt-6 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground">
-                Reset search
-              </Link>
+              <h3 className="mt-4 text-lg font-semibold">No local jobs match currently</h3>
+              <p className="mt-1 max-w-sm text-muted-foreground">Scrape the live web for verified opportunities in {search.location || "India"}.</p>
+              <button
+                onClick={() => {
+                  if (search.location) {
+                    setIsScraping(true);
+                    fetch(`/api/scrape/location?location=${encodeURIComponent(search.location)}`, { method: "POST" })
+                      .then((res) => res.json())
+                      .then(() => {
+                        toast.success(`Scraped web for ${search.location}!`);
+                        window.location.reload();
+                      })
+                      .finally(() => setIsScraping(false));
+                  }
+                }}
+                className="mt-6 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+              >
+                {isScraping ? "Scraping web..." : `Scrape live ${search.location || "India"} jobs now`}
+              </button>
             </div>
           )}
         </section>
@@ -286,3 +340,4 @@ function ActiveTag({ children, onRemove }: { children: React.ReactNode; onRemove
     </span>
   );
 }
+

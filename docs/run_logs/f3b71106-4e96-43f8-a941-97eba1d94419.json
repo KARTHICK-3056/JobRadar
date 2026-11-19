@@ -1,0 +1,18 @@
+{
+  "run_id": "f3b71106-4e96-43f8-a941-97eba1d94419",
+  "source_id": "lever_paytm",
+  "mode": "live",
+  "status": "success",
+  "started_at": "2026-11-19T12:25:35.083975+00:00",
+  "finished_at": "2026-11-19T12:25:45.204653+00:00",
+  "source_url": "https://api.lever.co/v0/postings/paytm?mode=json",
+  "http_status": 200,
+  "parsed_count": 197,
+  "failed_count": 0,
+  "new_count": 197,
+  "updated_count": 0,
+  "removed_count": 0,
+  "duplicate_count": 0,
+  "warnings": [],
+  "error_message": null
+}

@@ -63,6 +63,24 @@ COMPANY_METADATA: Dict[str, Dict[str, Any]] = {
         "location": "Bengaluru, Karnataka, India",
         "about": "Groww is India's leading fintech platform empowering millions of investors with transparent, effortless investing in stocks, mutual funds, and digital gold.",
     },
+    "paytm": {
+        "id": "paytm",
+        "name": "Paytm",
+        "tone": 2,
+        "industry": "Fintech & Digital Payments",
+        "size": "10,000+ people",
+        "location": "Pan-India (Chennai, Bengaluru, Pune, Mumbai, Delhi)",
+        "about": "Paytm is India's pioneer in mobile payments and financial technology, serving millions of merchants and consumers across India.",
+    },
+    "fourkites": {
+        "id": "fourkites",
+        "name": "FourKites",
+        "tone": 3,
+        "industry": "Enterprise SaaS & Supply Chain",
+        "size": "600+ people",
+        "location": "Chennai, Tamil Nadu, India",
+        "about": "FourKites operates the world's largest real-time supply chain tracking platform, with its premier global engineering hub in Chennai.",
+    },
 }
 
 COMMON_BENEFITS = [
@@ -90,6 +108,10 @@ def infer_company_id(company_name: str) -> str:
         return "meesho"
     if "groww" in c_lower:
         return "groww"
+    if "paytm" in c_lower:
+        return "paytm"
+    if "fourkites" in c_lower:
+        return "fourkites"
     if "acme" in c_lower or "robot" in c_lower:
         return "acme-robotics"
     if "bio" in c_lower:
@@ -140,18 +162,18 @@ def infer_category(title: str) -> str:
 
 
 def infer_salary(level: str, job_type: str) -> Tuple[int, int]:
-    """Estimate salary range in thousands."""
+    """Estimate salary range in Lakhs Per Annum (LPA)."""
     if job_type == "Internship":
-        return 45, 65
+        return 4, 8
     if level == "Junior":
-        return 65, 85
+        return 6, 12
     if level == "Mid":
-        return 95, 130
+        return 14, 25
     if level == "Senior":
-        return 140, 185
+        return 28, 48
     if level == "Lead":
-        return 180, 230
-    return 80, 110
+        return 50, 85
+    return 10, 18
 
 
 def infer_tags(title: str, company: str, category: str) -> List[str]:
@@ -345,7 +367,7 @@ export function getJob(id: string): Job | undefined {{
 }}
 
 export function formatSalary(job: Pick<Job, "salaryMin" | "salaryMax">) {{
-  return `$${{job.salaryMin}}k – $${{job.salaryMax}}k`;
+  return `₹${{job.salaryMin}} – ₹${{job.salaryMax}} LPA`;
 }}
 
 export function formatPosted(days: number) {{
@@ -375,10 +397,18 @@ export function filterJobs(list: Job[], f: JobFilters): Job[] {{
     }}
     if (loc) {{
       const isIndiaQuery = loc === "india" || loc.includes("india");
-      const indiaKeywords = ["bengaluru", "bangalore", "karnataka", "hyderabad", "pune", "mumbai", "delhi", "gurgaon", "gurugram", "noida", "chennai", "india"];
+      const isChennaiQuery = loc.includes("chennai") || loc.includes("madras") || loc.includes("tamil");
+      const indiaKeywords = [
+        "bengaluru", "bangalore", "karnataka", "hyderabad", "telangana",
+        "pune", "mumbai", "maharashtra", "delhi", "gurgaon", "gurugram",
+        "noida", "chennai", "tamil nadu", "coimbatore", "vellore", "india"
+      ];
       const jobLoc = job.location.toLowerCase();
       let matchesLoc = jobLoc.includes(loc) || (job.remote && "remote".includes(loc));
       if (isIndiaQuery && indiaKeywords.some((k) => jobLoc.includes(k))) {{
+        matchesLoc = true;
+      }}
+      if (isChennaiQuery && (jobLoc.includes("chennai") || jobLoc.includes("tamil") || jobLoc.includes("coimbatore") || jobLoc.includes("vellore"))) {{
         matchesLoc = true;
       }}
       if ((loc.includes("bangalore") || loc.includes("bengaluru")) && (jobLoc.includes("bangalore") || jobLoc.includes("bengaluru"))) {{

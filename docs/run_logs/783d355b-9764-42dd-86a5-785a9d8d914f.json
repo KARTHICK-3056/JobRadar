@@ -1,0 +1,18 @@
+{
+  "run_id": "783d355b-9764-42dd-86a5-785a9d8d914f",
+  "source_id": "greenhouse_fourkites",
+  "mode": "live",
+  "status": "success",
+  "started_at": "2026-11-19T12:25:24.463267+00:00",
+  "finished_at": "2026-11-19T12:25:25.139821+00:00",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/fourkites/jobs?content=true",
+  "http_status": 200,
+  "parsed_count": 11,
+  "failed_count": 0,
+  "new_count": 11,
+  "updated_count": 0,
+  "removed_count": 0,
+  "duplicate_count": 0,
+  "warnings": [],
+  "error_message": null
+}

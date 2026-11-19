@@ -103,7 +103,7 @@ export function SearchBar({
       role="search"
       onSubmit={handleSubmit}
       className={cn(
-        "relative flex w-full flex-col gap-2 rounded-3xl border border-border bg-card p-2 shadow-lift sm:flex-row sm:items-center sm:rounded-full",
+        "relative z-30 flex w-full flex-col gap-2 rounded-3xl border border-border bg-card p-2 shadow-lift sm:flex-row sm:items-center sm:rounded-full",
         className,
       )}
     >
@@ -121,7 +121,7 @@ export function SearchBar({
       <div className="hidden h-8 w-px bg-border sm:block" />
 
       {/* Location Input with Autocomplete Suggestions */}
-      <div ref={locationWrapperRef} className="relative flex-1">
+      <div ref={locationWrapperRef} className="relative z-30 flex-1">
         <label className="flex items-center gap-3 rounded-full px-4 py-3 transition-colors focus-within:bg-muted">
           <MapPin className="size-5 shrink-0 text-primary" />
           <span className="sr-only">Location</span>
@@ -166,8 +166,7 @@ export function SearchBar({
         {/* Suggestions Popover */}
         {showSuggestions && suggestions.length > 0 && (
           <div
-            style={{ backgroundColor: "var(--card, #ffffff)" }}
-            className="absolute left-0 right-0 sm:left-0 sm:right-auto sm:min-w-[320px] top-full z-50 mt-2 max-h-64 overflow-y-auto rounded-2xl border border-border bg-card p-1.5 shadow-2xl"
+            className="absolute left-0 right-0 sm:left-0 sm:right-auto sm:min-w-[320px] top-full z-50 mt-2 max-h-64 overflow-y-auto rounded-2xl border border-border bg-popover text-popover-foreground p-1.5 shadow-2xl"
           >
             <div className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               Location suggestions

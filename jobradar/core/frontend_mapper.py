@@ -81,6 +81,51 @@ COMPANY_METADATA: Dict[str, Dict[str, Any]] = {
         "location": "Chennai, Tamil Nadu, India",
         "about": "FourKites operates the world's largest real-time supply chain tracking platform, with its premier global engineering hub in Chennai.",
     },
+    "zuora": {
+        "id": "zuora",
+        "name": "Zuora",
+        "tone": 4,
+        "industry": "Enterprise SaaS & Subscriptions",
+        "size": "1,500+ people",
+        "location": "Chennai, Tamil Nadu & Bengaluru",
+        "about": "Zuora is the leading subscription management platform, powering billing and revenue operations for global innovators from its tech centers in Chennai and Bengaluru.",
+    },
+    "cred": {
+        "id": "cred",
+        "name": "CRED",
+        "tone": 1,
+        "industry": "Fintech & Rewards",
+        "size": "800+ people",
+        "location": "Bengaluru & Pan-India",
+        "about": "CRED is India's premium reward-based credit card payments and financial services platform.",
+    },
+    "inmobi": {
+        "id": "inmobi",
+        "name": "InMobi",
+        "tone": 3,
+        "industry": "AdTech & Mobile Platforms",
+        "size": "2,500+ people",
+        "location": "Bengaluru, Karnataka, India",
+        "about": "InMobi is India's first tech unicorn, transforming mobile marketing and content monetization globally.",
+    },
+    "druva": {
+        "id": "druva",
+        "name": "Druva",
+        "tone": 5,
+        "industry": "Cloud Data Protection & Resiliency",
+        "size": "1,000+ people",
+        "location": "Pune, Maharashtra, India",
+        "about": "Druva is a 100% SaaS cloud data security platform with core product engineering located in Pune.",
+    },
+    "highradius": {
+        "id": "highradius",
+        "name": "HighRadius",
+        "tone": 6,
+        "industry": "Fintech SaaS & Autonomous Finance",
+        "size": "3,000+ people",
+        "location": "Hyderabad, Telangana, India",
+        "about": "HighRadius delivers AI-powered autonomous finance software with major R&D hubs in Hyderabad.",
+    },
 }
 
 COMMON_BENEFITS = [
@@ -398,10 +443,16 @@ export function filterJobs(list: Job[], f: JobFilters): Job[] {{
     if (loc) {{
       const isIndiaQuery = loc === "india" || loc.includes("india");
       const isChennaiQuery = loc.includes("chennai") || loc.includes("madras") || loc.includes("tamil");
+      const isBangaloreQuery = loc.includes("bangalore") || loc.includes("bengaluru") || loc.includes("karnataka");
+      const isHyderabadQuery = loc.includes("hyderabad") || loc.includes("telangana");
+      const isPuneQuery = loc.includes("pune");
+      const isMumbaiQuery = loc.includes("mumbai") || loc.includes("bombay");
+      const isDelhiQuery = loc.includes("delhi") || loc.includes("noida") || loc.includes("gurgaon") || loc.includes("gurugram");
+
       const indiaKeywords = [
         "bengaluru", "bangalore", "karnataka", "hyderabad", "telangana",
         "pune", "mumbai", "maharashtra", "delhi", "gurgaon", "gurugram",
-        "noida", "chennai", "tamil nadu", "coimbatore", "vellore", "india"
+        "noida", "chennai", "tamil nadu", "tamil", "coimbatore", "vellore", "india"
       ];
       const jobLoc = job.location.toLowerCase();
       let matchesLoc = jobLoc.includes(loc) || (job.remote && "remote".includes(loc));
@@ -411,7 +462,19 @@ export function filterJobs(list: Job[], f: JobFilters): Job[] {{
       if (isChennaiQuery && (jobLoc.includes("chennai") || jobLoc.includes("tamil") || jobLoc.includes("coimbatore") || jobLoc.includes("vellore"))) {{
         matchesLoc = true;
       }}
-      if ((loc.includes("bangalore") || loc.includes("bengaluru")) && (jobLoc.includes("bangalore") || jobLoc.includes("bengaluru"))) {{
+      if (isBangaloreQuery && (jobLoc.includes("bangalore") || jobLoc.includes("bengaluru") || jobLoc.includes("karnataka"))) {{
+        matchesLoc = true;
+      }}
+      if (isHyderabadQuery && (jobLoc.includes("hyderabad") || jobLoc.includes("telangana"))) {{
+        matchesLoc = true;
+      }}
+      if (isPuneQuery && (jobLoc.includes("pune") || jobLoc.includes("maharashtra"))) {{
+        matchesLoc = true;
+      }}
+      if (isMumbaiQuery && (jobLoc.includes("mumbai") || jobLoc.includes("bombay") || jobLoc.includes("maharashtra"))) {{
+        matchesLoc = true;
+      }}
+      if (isDelhiQuery && (jobLoc.includes("delhi") || jobLoc.includes("noida") || jobLoc.includes("gurgaon") || jobLoc.includes("gurugram"))) {{
         matchesLoc = true;
       }}
       if (!matchesLoc) return false;

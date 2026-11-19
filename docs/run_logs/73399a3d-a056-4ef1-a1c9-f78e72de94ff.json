@@ -1,0 +1,18 @@
+{
+  "run_id": "73399a3d-a056-4ef1-a1c9-f78e72de94ff",
+  "source_id": "greenhouse_highradius",
+  "mode": "live",
+  "status": "success",
+  "started_at": "2026-11-19T14:37:37.429451+00:00",
+  "finished_at": "2026-11-19T14:37:39.447105+00:00",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/highradius/jobs?content=true",
+  "http_status": 200,
+  "parsed_count": 64,
+  "failed_count": 0,
+  "new_count": 64,
+  "updated_count": 0,
+  "removed_count": 0,
+  "duplicate_count": 0,
+  "warnings": [],
+  "error_message": null
+}

@@ -85,6 +85,61 @@ sources:
     filter_keywords:
       enabled: false
 
+  - id: "greenhouse_zuora"
+    name: "Zuora (Greenhouse Chennai & Bengaluru)"
+    type: "greenhouse"
+    board_token: "zuora"
+    base_url: "https://boards-api.greenhouse.io/v1/boards/zuora/jobs?content=true"
+    refresh_interval_minutes: 60
+    enabled: true
+    mentor_approved: true
+    filter_keywords:
+      enabled: false
+
+  - id: "lever_cred"
+    name: "CRED (Lever Bengaluru & Chennai)"
+    type: "lever"
+    company: "cred"
+    base_url: "https://api.lever.co/v0/postings/cred?mode=json"
+    refresh_interval_minutes: 60
+    enabled: true
+    mentor_approved: true
+    filter_keywords:
+      enabled: false
+
+  - id: "greenhouse_inmobi"
+    name: "InMobi (Greenhouse Bengaluru)"
+    type: "greenhouse"
+    board_token: "inmobi"
+    base_url: "https://boards-api.greenhouse.io/v1/boards/inmobi/jobs?content=true"
+    refresh_interval_minutes: 60
+    enabled: true
+    mentor_approved: true
+    filter_keywords:
+      enabled: false
+
+  - id: "greenhouse_druva"
+    name: "Druva (Greenhouse Pune)"
+    type: "greenhouse"
+    board_token: "druva"
+    base_url: "https://boards-api.greenhouse.io/v1/boards/druva/jobs?content=true"
+    refresh_interval_minutes: 60
+    enabled: true
+    mentor_approved: true
+    filter_keywords:
+      enabled: false
+
+  - id: "greenhouse_highradius"
+    name: "HighRadius (Greenhouse Hyderabad)"
+    type: "greenhouse"
+    board_token: "highradius"
+    base_url: "https://boards-api.greenhouse.io/v1/boards/highradius/jobs?content=true"
+    refresh_interval_minutes: 60
+    enabled: true
+    mentor_approved: true
+    filter_keywords:
+      enabled: false
+
   - id: "python_org_jobs"
     name: "Python Software Foundation Job Board"
     type: "html"

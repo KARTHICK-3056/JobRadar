@@ -10,7 +10,7 @@ import uuid
 
 from sqlalchemy.orm import Session
 
-from jobradar.adapters import get_adapter
+from jobradar.adapters.factory import get_adapter
 from jobradar.compliance.compliance import (
     CompliantHttpClient,
     RateLimitedError,

@@ -194,6 +194,7 @@ class TrackerUpdateRequest(BaseModel):
 
 
 class TestCaseResult(BaseModel):
+    __test__ = False
     id: str
     name: str
     expected: str

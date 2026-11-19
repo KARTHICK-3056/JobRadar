@@ -1,0 +1,111 @@
+{
+  "cases": [
+    {
+      "id": "case_add_1",
+      "name": "Add listing 101",
+      "expected": "added",
+      "actual": "added",
+      "passed": true
+    },
+    {
+      "id": "case_add_2",
+      "name": "Add listing 102",
+      "expected": "added",
+      "actual": "added",
+      "passed": true
+    },
+    {
+      "id": "case_add_3",
+      "name": "Add listing 103",
+      "expected": "added",
+      "actual": "added",
+      "passed": true
+    },
+    {
+      "id": "case_edit_title",
+      "name": "Edit listing title",
+      "expected": "edited:title",
+      "actual": "edited:title",
+      "passed": true
+    },
+    {
+      "id": "case_edit_location",
+      "name": "Edit listing location",
+      "expected": "edited:location",
+      "actual": "edited:location",
+      "passed": true
+    },
+    {
+      "id": "case_edit_deadline",
+      "name": "Edit listing deadline",
+      "expected": "edited:deadline",
+      "actual": "edited:deadline",
+      "passed": true
+    },
+    {
+      "id": "case_removal_confirmed_1",
+      "name": "Confirm removal of listing 103 after N=2 misses",
+      "expected": "removed",
+      "actual": "removed",
+      "passed": true
+    },
+    {
+      "id": "case_removal_confirmed_2",
+      "name": "Confirm removal of listing 104 after N=2 misses",
+      "expected": "removed",
+      "actual": "removed",
+      "passed": true
+    },
+    {
+      "id": "case_formatting_only_1",
+      "name": "HTML formatting-only tags produce NO change event",
+      "expected": "no_event",
+      "actual": "no_event",
+      "passed": true
+    },
+    {
+      "id": "case_formatting_only_2",
+      "name": "Whitespace formatting-only produces NO change event",
+      "expected": "no_event",
+      "actual": "no_event",
+      "passed": true
+    },
+    {
+      "id": "case_404_restored",
+      "name": "HTTP 404 followed by restored page (NO removal, NO duplicate added events)",
+      "expected": "restored_no_duplicate_add",
+      "actual": "restored_no_duplicate_add",
+      "passed": true
+    },
+    {
+      "id": "case_selector_break",
+      "name": "Selector break triggers parser_failure, NOT removal",
+      "expected": "parser_failure_no_removal",
+      "actual": "parser_failure_no_removal",
+      "passed": true
+    },
+    {
+      "id": "case_http_429",
+      "name": "HTTP 429 halts crawl and sets source state rate_limited",
+      "expected": "rate_limited",
+      "actual": "rate_limited",
+      "passed": true
+    },
+    {
+      "id": "case_duplicate_suppression",
+      "name": "Duplicate change event suppression prevents inflated pending review queue",
+      "expected": "suppressed",
+      "actual": "suppressed",
+      "passed": true
+    },
+    {
+      "id": "case_idempotent_rerun",
+      "name": "Idempotent rerun of same input generates 0 new/updated/removed counts",
+      "expected": "idempotent_0_changes",
+      "actual": "idempotent_0_changes",
+      "passed": true
+    }
+  ],
+  "false_alert_rate": 0.0,
+  "total_cases": 15
+}

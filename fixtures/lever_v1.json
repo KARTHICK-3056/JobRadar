@@ -1,0 +1,26 @@
+[
+  {
+    "id": "lev-201",
+    "text": "Machine Learning Intern",
+    "createdAt": 1693526400000,
+    "hostedUrl": "https://jobs.lever.co/spotify/lev-201",
+    "categories": {
+      "location": "Boston, MA",
+      "commitment": "Internship",
+      "team": "Machine Learning"
+    },
+    "descriptionPlain": "Build recommendation algorithms for millions of listeners."
+  },
+  {
+    "id": "lev-202",
+    "text": "Backend Engineer (Early Career)",
+    "createdAt": 1693526500000,
+    "hostedUrl": "https://jobs.lever.co/spotify/lev-202",
+    "categories": {
+      "location": "New York, NY",
+      "commitment": "Full-time",
+      "team": "Infrastructure"
+    },
+    "descriptionPlain": "Design scalable distributed microservices in Java and Python."
+  }
+]

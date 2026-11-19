@@ -404,8 +404,8 @@ def sync_to_frontend(db: Session, target_path: str | None = None) -> None:
 
     candidates = [
         Path(target_path) if target_path else None,
-        Path("frontend_new/src/lib/jobs.ts"),
         Path("frontend/src/lib/jobs.ts"),
+        Path("frontend_new/src/lib/jobs.ts"),
     ]
     synced = set()
     for p in candidates:

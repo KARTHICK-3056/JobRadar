@@ -1,0 +1,36 @@
+{
+  "jobs": [
+    {
+      "id": 101,
+      "title": "Senior Software Engineering Intern",
+      "updated_at": "2026-09-10T10:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/figma/jobs/101",
+      "location": { "name": "San Francisco, CA" },
+      "content": "<p>Updated content: Join Figma as a Senior Software Engineering Intern!</p>"
+    },
+    {
+      "id": 102,
+      "title": "Product Design Intern",
+      "updated_at": "2026-09-10T10:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/figma/jobs/102",
+      "location": { "name": "Remote, US" },
+      "content": "<p>Design intuitive user interfaces for creative tooling.</p>"
+    },
+    {
+      "id": 103,
+      "title": "Data Science Intern",
+      "updated_at": "2026-09-03T10:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/figma/jobs/103",
+      "location": { "name": "San Francisco, CA" },
+      "content": "<p>Analyze product metrics and model collaborative workflows.</p>"
+    },
+    {
+      "id": 104,
+      "title": "Security Engineering Intern",
+      "updated_at": "2026-09-11T10:00:00Z",
+      "absolute_url": "https://boards.greenhouse.io/figma/jobs/104",
+      "location": { "name": "San Francisco, CA" },
+      "content": "<p>Work on app security, cryptography, and cloud hardening.</p>"
+    }
+  ]
+}

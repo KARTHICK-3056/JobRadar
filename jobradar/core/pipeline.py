@@ -275,6 +275,12 @@ class RunPipeline:
 
             session.commit()
 
+            try:
+                from jobradar.core.frontend_mapper import sync_to_frontend
+                sync_to_frontend(session)
+            except Exception as sync_err:
+                logger.debug("Frontend sync deferred: %s", sync_err)
+
         except RateLimitedError as rle:
             error_msg = str(rle)
             logger.error("Rate limit hit: %s", error_msg)

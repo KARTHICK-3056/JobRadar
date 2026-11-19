@@ -11,8 +11,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -43,3 +43,10 @@ junit.xml
 *.log
 .DS_Store
 Thumbs.db
+
+# Frontend
+node_modules/
+.output/
+.nitro/
+dist/
+

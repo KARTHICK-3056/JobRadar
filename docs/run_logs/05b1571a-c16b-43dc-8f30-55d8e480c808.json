@@ -1,0 +1,20 @@
+{
+  "run_id": "05b1571a-c16b-43dc-8f30-55d8e480c808",
+  "source_id": "python_jobs_test",
+  "mode": "fixture",
+  "status": "parser_failure",
+  "started_at": "2026-11-19T11:34:40.901968",
+  "finished_at": "2026-11-19T11:34:40.907964",
+  "source_url": "https://www.python.org/jobs/",
+  "http_status": 200,
+  "parsed_count": 0,
+  "failed_count": 0,
+  "new_count": 0,
+  "updated_count": 0,
+  "removed_count": 0,
+  "duplicate_count": 0,
+  "warnings": [
+    "Zero items extracted where 2 active items previously existed (possible selector breakage)"
+  ],
+  "error_message": "Zero items extracted where 2 active items previously existed (possible selector breakage)"
+}

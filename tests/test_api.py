@@ -238,3 +238,21 @@ def test_get_metrics(client_with_db):
     assert "cases" in data
     assert "false_alert_rate" in data
     assert "total_cases" in data
+
+
+def test_get_frontend_jobs_and_companies(client_with_db):
+    resp = client_with_db.get("/api/jobs")
+    assert resp.status_code == 200
+    jobs = resp.json()
+    assert isinstance(jobs, list)
+    assert len(jobs) >= 1
+    assert "Engineering Intern" in jobs[0]["title"]
+    assert jobs[0]["companyId"] == "figma"
+
+    resp_c = client_with_db.get("/api/companies")
+    assert resp_c.status_code == 200
+    companies = resp_c.json()
+    assert isinstance(companies, list)
+    assert len(companies) >= 1
+    assert any(c["id"] == "figma" for c in companies)
+

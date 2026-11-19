@@ -437,3 +437,18 @@ def get_metrics():
             return MetricsResponse(**data)
 
     return MetricsResponse(cases=[], false_alert_rate=0.0, total_cases=0)
+
+
+@router.get("/jobs")
+def get_jobs_for_frontend(db: Session = Depends(get_db)):
+    """Retrieve jobs mapped to the frontend contract."""
+    from jobradar.core.frontend_mapper import get_frontend_jobs
+    return get_frontend_jobs(db)
+
+
+@router.get("/companies")
+def get_companies_for_frontend(db: Session = Depends(get_db)):
+    """Retrieve companies mapped to the frontend contract."""
+    from jobradar.core.frontend_mapper import get_frontend_companies
+    return get_frontend_companies(db)
+

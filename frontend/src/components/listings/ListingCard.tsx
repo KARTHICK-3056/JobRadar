@@ -2,11 +2,11 @@ import React from 'react';
 import {
   MapPin,
   Clock,
-  Sparkles,
   RefreshCw,
   ExternalLink,
   Bookmark,
   Calendar,
+  PlusCircle,
 } from 'lucide-react';
 import type { Listing } from '../../types';
 import { formatRelativeTime, getDaysRemaining } from '../../lib/utils';
@@ -31,7 +31,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, onClick }) =>
       { entityId: listing.entity_id, status: 'saved' },
       {
         onSuccess: () => {
-          toast.success(isSaved ? 'Listing bookmarked in Tracker' : 'Saved to Tracker!');
+          toast.success(isSaved ? 'Listing bookmarked in Tracker' : 'Saved to Tracker');
         },
       }
     );
@@ -48,113 +48,113 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, onClick }) =>
   return (
     <div
       onClick={onClick}
-      className="group relative overflow-hidden rounded-2xl p-5 border border-border bg-surface/70 hover:bg-surface-elevated/90 backdrop-blur-xl transition-all duration-200 hover:-translate-y-1 hover:border-cyan-500/40 hover:shadow-card-hover cursor-pointer flex flex-col justify-between"
+      className="group relative rounded-xl p-4 border border-border bg-surface hover:bg-surface-elevated transition-colors duration-150 cursor-pointer flex flex-col justify-between"
     >
       <div>
         {/* Top Header: Company Avatar, Title, Status & Changed Badge */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500/20 to-violet-500/20 border border-cyan-500/30 text-cyan-300 font-bold text-sm flex items-center justify-center shrink-0">
+        <div className="flex items-start justify-between gap-2.5 mb-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-surface-elevated border border-border text-foreground font-mono text-xs font-medium flex items-center justify-center shrink-0">
               {listing.company.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <h3 className="font-bold text-sm md:text-base text-foreground truncate group-hover:text-cyan-400 transition-colors">
+              <h3 className="font-medium text-xs md:text-sm text-foreground truncate">
                 {listing.title}
               </h3>
-              <p className="text-xs text-muted-foreground truncate">{listing.company}</p>
+              <p className="text-[11px] text-muted-foreground truncate">{listing.company}</p>
             </div>
           </div>
 
           {/* Quick Bookmark Button */}
           <button
             onClick={handleToggleBookmark}
-            className={`p-1.5 rounded-lg border transition-colors ${
+            className={`p-1.5 rounded-md border transition-colors ${
               isSaved
-                ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-400'
-                : 'border-border/60 text-muted-foreground hover:text-cyan-400 hover:border-cyan-500/30'
+                ? 'bg-surface-elevated border-secondary text-foreground'
+                : 'border-border text-muted-foreground hover:text-foreground hover:bg-surface-elevated'
             }`}
             title={isSaved ? 'Saved in Tracker' : 'Save to Tracker'}
             aria-label="Save to Tracker"
           >
-            <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-cyan-400' : ''}`} />
+            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} />
           </button>
         </div>
 
         {/* Badges Row: Status, Job Type, Change indicator */}
-        <div className="flex flex-wrap items-center gap-1.5 mb-4">
+        <div className="flex flex-wrap items-center gap-1.5 mb-3">
           {/* Status chip */}
           {listing.status === 'active' ? (
-            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-added/10 text-added border border-added/20">
               Active
             </span>
           ) : (
-            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-rose-500/15 text-rose-400 border border-rose-500/30">
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-removed/10 text-removed border border-removed/20">
               Removed
             </span>
           )}
 
           {/* Job Type chip */}
           {listing.job_type && (
-            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-surface-elevated text-muted-foreground border border-border capitalize">
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-surface-elevated text-secondary border border-border capitalize">
               {listing.job_type.replace('_', ' ')}
             </span>
           )}
 
           {/* Changed Indicator */}
           {listing.last_change_category === 'edited' && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-amber-500/15 text-amber-400 border border-amber-500/30">
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-edited/10 text-edited border border-edited/20">
               <RefreshCw className="w-3 h-3" />
-              Changed
+              Edited
             </span>
           )}
           {listing.last_change_category === 'added' && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-              <Sparkles className="w-3 h-3" />
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-added/10 text-added border border-added/20">
+              <PlusCircle className="w-3 h-3" />
               New
             </span>
           )}
         </div>
 
         {/* Location & Deadline Row */}
-        <div className="space-y-1.5 text-xs text-muted-foreground mb-4">
+        <div className="space-y-1 text-xs text-muted-foreground mb-3">
           <div className="flex items-center gap-1.5 truncate">
-            <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-            <span className="truncate">{listing.location || '—'}</span>
+            <MapPin className="w-3.5 h-3.5 text-secondary shrink-0" />
+            <span className="truncate text-secondary text-[11px]">{listing.location || '—'}</span>
           </div>
 
           <div className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <Clock className="w-3.5 h-3.5 text-secondary shrink-0" />
             {listing.deadline ? (
               <span
-                className={`font-mono font-medium ${
-                  isUrgent ? 'text-rose-400 font-semibold' : 'text-foreground'
+                className={`font-mono text-[11px] ${
+                  isUrgent ? 'text-removed font-medium' : 'text-secondary'
                 }`}
               >
                 {deadlineLabel}
               </span>
             ) : (
-              <span>No deadline specified</span>
+              <span className="text-[11px] text-muted-foreground">No deadline specified</span>
             )}
           </div>
         </div>
       </div>
 
       {/* Card Footer: Source attribution & Seen timestamps */}
-      <div className="pt-3 border-t border-border/60 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+      <div className="pt-2.5 border-t border-border flex items-center justify-between text-[11px] font-mono text-muted-foreground">
         <a
           href={listing.canonical_url}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="inline-flex items-center gap-1 text-cyan-400/80 hover:text-cyan-300 hover:underline transition-colors"
+          className="inline-flex items-center gap-1 text-secondary hover:text-foreground transition-colors"
           title={`Open original posting on ${sourceDomain}`}
         >
-          <span>Source: {sourceDomain}</span>
+          <span>{sourceDomain}</span>
           <ExternalLink className="w-3 h-3" />
         </a>
 
-        <div className="flex items-center gap-1" title={`First seen: ${new Date(listing.first_seen).toLocaleString()}`}>
-          <Calendar className="w-3 h-3 text-muted-foreground" />
+        <div className="flex items-center gap-1 text-muted-foreground">
+          <Calendar className="w-3 h-3" />
           <span>Seen {formatRelativeTime(listing.last_seen)}</span>
         </div>
       </div>

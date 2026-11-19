@@ -31,13 +31,13 @@ import { getDaysRemaining } from '../lib/utils';
 import type { TrackerStage, Listing, TrackerItem } from '../types';
 import { toast } from 'sonner';
 
-const COLUMNS: { id: TrackerStage; label: string; color: string; bg: string }[] = [
-  { id: 'saved', label: 'Saved', color: 'text-cyan-400', bg: 'border-cyan-500/25 bg-cyan-500/5' },
-  { id: 'applied', label: 'Applied', color: 'text-violet-400', bg: 'border-violet-500/25 bg-violet-500/5' },
-  { id: 'online_test', label: 'Online Test (OA)', color: 'text-amber-400', bg: 'border-amber-500/25 bg-amber-500/5' },
-  { id: 'interview', label: 'Interview', color: 'text-emerald-400', bg: 'border-emerald-500/25 bg-emerald-500/5' },
-  { id: 'offer', label: 'Offer', color: 'text-teal-300', bg: 'border-teal-500/25 bg-teal-500/5' },
-  { id: 'rejected', label: 'Archived / Rejected', color: 'text-slate-400', bg: 'border-slate-500/25 bg-slate-500/5' },
+const COLUMNS: { id: TrackerStage; label: string }[] = [
+  { id: 'saved', label: 'Saved' },
+  { id: 'applied', label: 'Applied' },
+  { id: 'online_test', label: 'Online test' },
+  { id: 'interview', label: 'Interview' },
+  { id: 'offer', label: 'Offer' },
+  { id: 'rejected', label: 'Archived' },
 ];
 
 interface KanbanCardProps {
@@ -74,14 +74,14 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ listing, trackerItem, onClick }
       {...attributes}
       {...listeners}
       onClick={onClick}
-      className="p-3.5 rounded-xl border border-border bg-surface/90 hover:bg-surface-elevated hover:border-cyan-500/30 shadow-sm backdrop-blur-md transition-all cursor-grab active:cursor-grabbing space-y-2.5 group"
+      className="p-3 rounded-lg border border-border bg-surface hover:bg-surface-elevated transition-colors cursor-grab active:cursor-grabbing space-y-2"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <span className="text-[11px] font-mono font-medium text-cyan-400 block truncate">
+          <span className="text-[11px] font-mono text-secondary block truncate">
             {listing.company}
           </span>
-          <h4 className="font-semibold text-xs text-foreground truncate group-hover:text-cyan-300 transition-colors">
+          <h4 className="font-medium text-xs text-foreground truncate">
             {listing.title}
           </h4>
         </div>
@@ -90,7 +90,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ listing, trackerItem, onClick }
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="p-1 text-muted-foreground hover:text-cyan-400 shrink-0"
+          className="p-0.5 text-muted-foreground hover:text-foreground shrink-0"
           title="Open original posting"
           aria-label="Open original posting"
         >
@@ -98,21 +98,21 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ listing, trackerItem, onClick }
         </a>
       </div>
 
-      {/* Deadline pill if present */}
+      {/* Deadline indicator if present */}
       {listing.deadline && (
         <div className="flex items-center gap-1.5 text-[11px] font-mono">
           <Clock className="w-3 h-3 text-muted-foreground" />
-          <span className={isUrgent ? 'text-rose-400 font-semibold' : 'text-muted-foreground'}>
+          <span className={isUrgent ? 'text-removed font-medium' : 'text-muted-foreground'}>
             {deadlineLabel}
           </span>
-          {isUrgent && <AlertCircle className="w-3 h-3 text-rose-400" />}
+          {isUrgent && <AlertCircle className="w-3 h-3 text-removed" />}
         </div>
       )}
 
       {/* Notes preview */}
       {trackerItem.notes && (
-        <div className="p-2 rounded-lg bg-surface-elevated/60 border border-border/50 text-[11px] text-muted-foreground flex items-start gap-1.5 line-clamp-2">
-          <FileText className="w-3 h-3 text-cyan-400 shrink-0 mt-0.5" />
+        <div className="p-1.5 rounded bg-surface-elevated border border-border text-[11px] text-muted-foreground flex items-start gap-1.5">
+          <FileText className="w-3 h-3 text-secondary shrink-0 mt-0.5" />
           <p className="line-clamp-2">{trackerItem.notes}</p>
         </div>
       )}
@@ -154,11 +154,9 @@ export const Tracker: React.FC = () => {
     const activeEntityId = String(active.id);
     const overId = String(over.id);
 
-    // If dropped onto a column container (e.g. "applied", "interview", etc.)
     const targetColumn = COLUMNS.find((col) => col.id === overId);
     let newStage: TrackerStage | null = targetColumn ? targetColumn.id : null;
 
-    // If dropped onto another item in a column, find that item's column
     if (!newStage) {
       const overTrackerItem = trackerList.find((t) => t.entity_id === overId);
       if (overTrackerItem) {
@@ -177,7 +175,7 @@ export const Tracker: React.FC = () => {
           },
           {
             onSuccess: () => {
-              toast.success(`Moved to "${newStage.replace('_', ' ').toUpperCase()}"`);
+              toast.success(`Moved to ${newStage.replace('_', ' ')}`);
             },
           }
         );
@@ -189,37 +187,37 @@ export const Tracker: React.FC = () => {
   const activeDragTracker = trackerList.find((t) => t.entity_id === activeDragId);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-500/30 text-violet-400 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-md bg-surface-elevated border border-border text-secondary flex items-center justify-center">
               <KanbanIcon className="w-4 h-4" />
             </div>
-            <h1 className="text-xl md:text-2xl font-bold text-foreground">
-              Application Tracker
+            <h1 className="text-xl font-medium text-foreground tracking-tight">
+              Application tracker
             </h1>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Drag and drop job cards between interview stages with optimistic updates
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Organize internship applications between interview stages with drag-and-drop
           </p>
         </div>
 
         <Link
           to="/listings"
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/25 transition-colors self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-surface-elevated hover:bg-surface border border-border text-foreground transition-colors self-start sm:self-auto"
         >
-          <PlusCircle className="w-3.5 h-3.5" />
-          <span>Add Jobs from Listings</span>
+          <PlusCircle className="w-3.5 h-3.5 text-secondary" />
+          <span>Browse listings</span>
         </Link>
       </div>
 
       {/* Kanban Board Container */}
       {isTrackerLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 animate-pulse">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-96 rounded-2xl bg-surface/50 border border-border/50" />
+            <div key={i} className="h-96 rounded-xl bg-surface border border-border" />
           ))}
         </div>
       ) : (
@@ -229,7 +227,7 @@ export const Tracker: React.FC = () => {
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 items-start overflow-x-auto pb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 items-start overflow-x-auto pb-4">
             {COLUMNS.map((col) => {
               const columnItems = trackerList.filter((t) => t.status === col.id);
               const columnListings = columnItems
@@ -243,14 +241,14 @@ export const Tracker: React.FC = () => {
                 <div
                   key={col.id}
                   id={col.id}
-                  className={`rounded-2xl border p-3 flex flex-col min-h-[480px] backdrop-blur-xl ${col.bg}`}
+                  className="rounded-xl border border-border bg-surface-elevated/40 p-3 flex flex-col min-h-[460px]"
                 >
                   {/* Column Header */}
-                  <div className="flex items-center justify-between pb-3 mb-3 border-b border-border/80">
-                    <span className={`text-xs font-bold font-mono uppercase tracking-wider ${col.color}`}>
+                  <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-border">
+                    <span className="text-xs font-medium text-foreground">
                       {col.label}
                     </span>
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-surface border border-border text-foreground">
+                    <span className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-surface border border-border text-secondary">
                       {columnListings.length}
                     </span>
                   </div>
@@ -261,11 +259,11 @@ export const Tracker: React.FC = () => {
                     items={columnListings.map((c) => c.listing.entity_id)}
                     strategy={verticalListSortingStrategy}
                   >
-                    <div className="space-y-2.5 flex-1 min-h-[100px]">
+                    <div className="space-y-2 flex-1 min-h-[100px]">
                       {columnListings.length === 0 ? (
-                        <div className="h-32 rounded-xl border border-dashed border-border/60 flex items-center justify-center p-3 text-center">
+                        <div className="h-28 rounded-lg border border-dashed border-border flex items-center justify-center p-3 text-center">
                           <span className="text-[11px] text-muted-foreground">
-                            Drag listings here
+                            Drop listings here
                           </span>
                         </div>
                       ) : (
@@ -288,11 +286,11 @@ export const Tracker: React.FC = () => {
           {/* Drag Overlay Ghost */}
           <DragOverlay>
             {activeDragListing && activeDragTracker ? (
-              <div className="p-3.5 rounded-xl border border-cyan-500 bg-surface shadow-2xl scale-105 pointer-events-none">
-                <span className="text-[11px] font-mono text-cyan-400 block">
+              <div className="p-3 rounded-lg border border-secondary bg-surface shadow-lg pointer-events-none">
+                <span className="text-[11px] font-mono text-secondary block">
                   {activeDragListing.company}
                 </span>
-                <h4 className="font-semibold text-xs text-foreground">
+                <h4 className="font-medium text-xs text-foreground">
                   {activeDragListing.title}
                 </h4>
               </div>

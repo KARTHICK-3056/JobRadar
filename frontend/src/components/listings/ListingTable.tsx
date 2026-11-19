@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, Sparkles, RefreshCw } from 'lucide-react';
+import { ExternalLink, RefreshCw, PlusCircle } from 'lucide-react';
 import type { Listing } from '../../types';
 import { formatRelativeTime, getDaysRemaining } from '../../lib/utils';
 
@@ -10,21 +10,21 @@ interface ListingTableProps {
 
 export const ListingTable: React.FC<ListingTableProps> = ({ listings, onSelectListing }) => {
   return (
-    <div className="rounded-2xl border border-border bg-surface/70 backdrop-blur-xl overflow-hidden shadow-sm">
+    <div className="rounded-xl border border-border bg-surface overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="border-b border-border bg-surface-elevated/50 font-mono text-muted-foreground uppercase text-[11px]">
-              <th className="py-3 px-4">Role & Company</th>
-              <th className="py-3 px-4">Location</th>
-              <th className="py-3 px-4">Type</th>
-              <th className="py-3 px-4">Deadline</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4">Source</th>
-              <th className="py-3 px-4 text-right">Last Seen</th>
+            <tr className="border-b border-border bg-surface-elevated font-mono text-muted-foreground text-[11px]">
+              <th className="py-2.5 px-3">Role & Company</th>
+              <th className="py-2.5 px-3">Location</th>
+              <th className="py-2.5 px-3">Type</th>
+              <th className="py-2.5 px-3">Deadline</th>
+              <th className="py-2.5 px-3">Status</th>
+              <th className="py-2.5 px-3">Source</th>
+              <th className="py-2.5 px-3 text-right">Last seen</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/60">
+          <tbody className="divide-y divide-border">
             {listings.map((job) => {
               const { label: deadlineLabel, isUrgent } = getDaysRemaining(job.deadline);
               let sourceDomain = 'source';
@@ -38,23 +38,23 @@ export const ListingTable: React.FC<ListingTableProps> = ({ listings, onSelectLi
                 <tr
                   key={job.entity_id}
                   onClick={() => onSelectListing(job)}
-                  className="hover:bg-surface-elevated/70 transition-colors cursor-pointer group"
+                  className="hover:bg-surface-elevated transition-colors cursor-pointer group"
                 >
                   {/* Role & Company */}
-                  <td className="py-3 px-4 min-w-[220px]">
-                    <div className="font-semibold text-foreground group-hover:text-cyan-400 transition-colors">
+                  <td className="py-2.5 px-3 min-w-[200px]">
+                    <div className="font-medium text-foreground">
                       {job.title}
                     </div>
                     <div className="text-muted-foreground text-[11px]">{job.company}</div>
                   </td>
 
                   {/* Location */}
-                  <td className="py-3 px-4 text-muted-foreground">{job.location || '—'}</td>
+                  <td className="py-2.5 px-3 text-secondary">{job.location || '—'}</td>
 
                   {/* Type */}
-                  <td className="py-3 px-4">
+                  <td className="py-2.5 px-3">
                     {job.job_type ? (
-                      <span className="capitalize px-2 py-0.5 rounded bg-surface-elevated border border-border text-[11px]">
+                      <span className="capitalize px-1.5 py-0.5 rounded bg-surface-elevated border border-border text-[11px] font-mono text-secondary">
                         {job.job_type.replace('_', ' ')}
                       </span>
                     ) : (
@@ -63,9 +63,9 @@ export const ListingTable: React.FC<ListingTableProps> = ({ listings, onSelectLi
                   </td>
 
                   {/* Deadline */}
-                  <td className="py-3 px-4 font-mono">
+                  <td className="py-2.5 px-3 font-mono">
                     {job.deadline ? (
-                      <span className={isUrgent ? 'text-rose-400 font-semibold' : 'text-foreground'}>
+                      <span className={isUrgent ? 'text-removed font-medium' : 'text-secondary'}>
                         {deadlineLabel}
                       </span>
                     ) : (
@@ -74,27 +74,27 @@ export const ListingTable: React.FC<ListingTableProps> = ({ listings, onSelectLi
                   </td>
 
                   {/* Status & Change */}
-                  <td className="py-3 px-4">
+                  <td className="py-2.5 px-3">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       {job.status === 'active' ? (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-added/10 text-added border border-added/20">
                           Active
                         </span>
                       ) : (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-removed/10 text-removed border border-removed/20">
                           Removed
                         </span>
                       )}
 
                       {job.last_change_category === 'edited' && (
-                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono bg-edited/10 text-edited border border-edited/20">
                           <RefreshCw className="w-2.5 h-2.5" />
-                          Changed
+                          Edited
                         </span>
                       )}
                       {job.last_change_category === 'added' && (
-                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                          <Sparkles className="w-2.5 h-2.5" />
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono bg-added/10 text-added border border-added/20">
+                          <PlusCircle className="w-2.5 h-2.5" />
                           New
                         </span>
                       )}
@@ -102,13 +102,13 @@ export const ListingTable: React.FC<ListingTableProps> = ({ listings, onSelectLi
                   </td>
 
                   {/* Source */}
-                  <td className="py-3 px-4 font-mono">
+                  <td className="py-2.5 px-3 font-mono text-[11px] text-secondary">
                     <a
                       href={job.canonical_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1 text-cyan-400/80 hover:text-cyan-300 hover:underline"
+                      className="hover:text-foreground inline-flex items-center gap-1 transition-colors"
                     >
                       <span>{sourceDomain}</span>
                       <ExternalLink className="w-3 h-3" />
@@ -116,7 +116,7 @@ export const ListingTable: React.FC<ListingTableProps> = ({ listings, onSelectLi
                   </td>
 
                   {/* Last Seen */}
-                  <td className="py-3 px-4 text-right font-mono text-muted-foreground whitespace-nowrap">
+                  <td className="py-2.5 px-3 text-right font-mono text-muted-foreground text-[11px]">
                     {formatRelativeTime(job.last_seen)}
                   </td>
                 </tr>

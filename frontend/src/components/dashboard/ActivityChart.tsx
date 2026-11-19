@@ -17,21 +17,21 @@ interface ActivityChartProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="p-3 rounded-xl border border-border bg-surface/95 shadow-xl backdrop-blur-xl text-xs space-y-1.5 min-w-[130px]">
-        <p className="font-mono font-semibold text-foreground border-b border-border pb-1 mb-1">
+      <div className="p-2.5 rounded-lg border border-border bg-surface shadow-md text-xs space-y-1 min-w-[120px]">
+        <p className="font-mono text-secondary border-b border-border pb-1 mb-1">
           {label}
         </p>
-        <div className="flex items-center justify-between text-emerald-400">
-          <span>New listings:</span>
-          <span className="font-mono font-bold">{payload[0]?.value ?? 0}</span>
+        <div className="flex items-center justify-between text-added">
+          <span className="text-secondary">Added</span>
+          <span className="font-mono tabular-nums">{payload[0]?.value ?? 0}</span>
         </div>
-        <div className="flex items-center justify-between text-amber-400">
-          <span>Changed:</span>
-          <span className="font-mono font-bold">{payload[1]?.value ?? 0}</span>
+        <div className="flex items-center justify-between text-edited">
+          <span className="text-secondary">Edited</span>
+          <span className="font-mono tabular-nums">{payload[1]?.value ?? 0}</span>
         </div>
-        <div className="flex items-center justify-between text-rose-400">
-          <span>Removed:</span>
-          <span className="font-mono font-bold">{payload[2]?.value ?? 0}</span>
+        <div className="flex items-center justify-between text-removed">
+          <span className="text-secondary">Removed</span>
+          <span className="font-mono tabular-nums">{payload[2]?.value ?? 0}</span>
         </div>
       </div>
     );
@@ -49,33 +49,33 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ data }) => {
   }));
 
   return (
-    <div className="rounded-2xl border border-border bg-surface/70 p-5 backdrop-blur-xl">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+    <div className="rounded-xl border border-border bg-surface p-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div>
           <div className="flex items-center gap-1.5">
-            <h3 className="font-semibold text-base text-foreground">14-Day Change Velocity</h3>
+            <h3 className="font-medium text-sm text-foreground">14-day change volume</h3>
             <InfoTooltip
-              content="Daily volume of verified additions, field-level mutations, and confirmed removals across all configured job boards."
+              content="Daily count of verified additions, field-level mutations, and confirmed removals across configured sources."
               showIcon
             />
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Real-time tracking of job market activity
+            Activity history across all monitored sources
           </p>
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 text-xs font-medium">
-          <div className="flex items-center gap-1.5 text-emerald-400">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm" />
-            <span>New listings</span>
+        <div className="flex items-center gap-4 text-xs font-mono">
+          <div className="flex items-center gap-1.5 text-secondary">
+            <span className="w-2 h-2 rounded-full bg-added" />
+            <span>New</span>
           </div>
-          <div className="flex items-center gap-1.5 text-amber-400">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm" />
+          <div className="flex items-center gap-1.5 text-secondary">
+            <span className="w-2 h-2 rounded-full bg-edited" />
             <span>Changed</span>
           </div>
-          <div className="flex items-center gap-1.5 text-rose-400">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-400 shadow-sm" />
+          <div className="flex items-center gap-1.5 text-secondary">
+            <span className="w-2 h-2 rounded-full bg-removed" />
             <span>Removed</span>
           </div>
         </div>
@@ -86,55 +86,56 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({ data }) => {
           <AreaChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorAdded" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10B981" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                <stop offset="5%" stopColor="#4cc38a" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#4cc38a" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorEdited" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="#F59E0B" stopOpacity={0} />
+                <stop offset="5%" stopColor="#e5a43b" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#e5a43b" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorRemoved" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#F43F5E" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="#F43F5E" stopOpacity={0} />
+                <stop offset="5%" stopColor="#e5484d" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#e5484d" stopOpacity={0} />
               </linearGradient>
             </defs>
             <XAxis
               dataKey="formattedDate"
-              stroke="#64748B"
+              stroke="rgb(var(--muted-foreground))"
               fontSize={11}
               tickLine={false}
-              axisLine={false}
+              axisLine={{ stroke: 'rgba(255,255,255,0.08)' }}
+              dy={6}
             />
             <YAxis
-              stroke="#64748B"
+              stroke="rgb(var(--muted-foreground))"
               fontSize={11}
               tickLine={false}
-              axisLine={false}
-              allowDecimals={false}
+              axisLine={{ stroke: 'rgba(255,255,255,0.08)' }}
+              dx={-6}
             />
             <Tooltip content={<CustomTooltip />} />
             <Area
               type="monotone"
               dataKey="added"
-              stackId="1"
-              stroke="#10B981"
-              strokeWidth={2}
+              stroke="#4cc38a"
+              strokeWidth={1.5}
+              fillOpacity={1}
               fill="url(#colorAdded)"
             />
             <Area
               type="monotone"
               dataKey="edited"
-              stackId="1"
-              stroke="#F59E0B"
-              strokeWidth={2}
+              stroke="#e5a43b"
+              strokeWidth={1.5}
+              fillOpacity={1}
               fill="url(#colorEdited)"
             />
             <Area
               type="monotone"
               dataKey="removed"
-              stackId="1"
-              stroke="#F43F5E"
-              strokeWidth={2}
+              stroke="#e5484d"
+              strokeWidth={1.5}
+              fillOpacity={1}
               fill="url(#colorRemoved)"
             />
           </AreaChart>

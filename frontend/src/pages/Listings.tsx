@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Briefcase, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Briefcase, SlidersHorizontal, ChevronLeft, ChevronRight, SearchX } from 'lucide-react';
 import { useListings, useSources } from '../hooks/useJobRadar';
 import { FilterBar } from '../components/listings/FilterBar';
 import { ListingCard } from '../components/listings/ListingCard';
 import { ListingTable } from '../components/listings/ListingTable';
 import { ListingDrawer } from '../components/listings/ListingDrawer';
-import { RadarGraphic } from '../components/common/RadarGraphic';
 import type { Listing } from '../types';
 
 export const Listings: React.FC = () => {
@@ -45,19 +44,19 @@ export const Listings: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-md bg-surface-elevated border border-border text-secondary flex items-center justify-center">
               <Briefcase className="w-4 h-4" />
             </div>
-            <h1 className="text-xl md:text-2xl font-bold text-foreground">
-              Internship & Job Listings
+            <h1 className="text-xl font-medium text-foreground tracking-tight">
+              Internship and job directory
             </h1>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-0.5">
             Displaying {listings.length} of {total} tracked opportunities
           </p>
         </div>
@@ -74,33 +73,33 @@ export const Listings: React.FC = () => {
 
       {/* Main Content Area */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-48 rounded-2xl bg-surface/50 border border-border/50" />
+            <div key={i} className="h-44 rounded-xl bg-surface border border-border" />
           ))}
         </div>
       ) : listings.length === 0 ? (
-        /* Helpful Empty State with Radar Graphic */
-        <div className="text-center py-16 px-4 rounded-3xl border border-border bg-surface/40 backdrop-blur-xl">
-          <div className="flex justify-center mb-4">
-            <RadarGraphic size={140} />
+        /* Helpful Empty State */
+        <div className="text-center py-16 px-4 rounded-xl border border-border bg-surface">
+          <div className="w-10 h-10 rounded-lg bg-surface-elevated border border-border text-secondary flex items-center justify-center mx-auto mb-3">
+            <SearchX className="w-5 h-5 text-muted-foreground" />
           </div>
-          <h2 className="text-lg font-semibold text-foreground mb-1">
-            No matching job listings found
+          <h2 className="text-sm font-medium text-foreground mb-1">
+            No matching listings found
           </h2>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-4">
-            Your current search or filter combination didn't match any tracked positions. Try clearing your filters.
+            Your current search or filter combination didn't match any tracked positions.
           </p>
           <button
             onClick={() => setSearchParams(new URLSearchParams())}
-            className="px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-500 text-slate-950 hover:bg-cyan-400 transition-colors inline-flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-md text-xs font-medium bg-surface-elevated hover:bg-surface border border-border text-foreground transition-colors inline-flex items-center gap-1.5"
           >
-            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <SlidersHorizontal className="w-3.5 h-3.5 text-secondary" />
             Reset all filters
           </button>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {listings.map((job) => (
             <ListingCard
               key={job.entity_id}
@@ -122,11 +121,11 @@ export const Listings: React.FC = () => {
           <span>
             Page {page} of {totalPages}
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => handlePageChange(page - 1)}
               disabled={page <= 1}
-              className="p-2 rounded-xl bg-surface border border-border hover:bg-surface-elevated text-foreground disabled:opacity-40 transition-colors"
+              className="p-1.5 rounded-md bg-surface border border-border hover:bg-surface-elevated text-foreground disabled:opacity-30 transition-colors"
               aria-label="Previous page"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -134,7 +133,7 @@ export const Listings: React.FC = () => {
             <button
               onClick={() => handlePageChange(page + 1)}
               disabled={page >= totalPages}
-              className="p-2 rounded-xl bg-surface border border-border hover:bg-surface-elevated text-foreground disabled:opacity-40 transition-colors"
+              className="p-1.5 rounded-md bg-surface border border-border hover:bg-surface-elevated text-foreground disabled:opacity-30 transition-colors"
               aria-label="Next page"
             >
               <ChevronRight className="w-4 h-4" />

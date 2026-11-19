@@ -30,7 +30,7 @@ export const AppLayout: React.FC = () => {
   const isMockMode = (import.meta as any).env.VITE_USE_MOCK === 'true' || isError || (!isLoading && !summary);
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground selection:bg-cyan-500/30">
+    <div className="min-h-screen flex bg-background text-foreground selection:bg-foreground/15">
       {/* Desktop Left Sidebar */}
       <Sidebar
         collapsed={collapsed}

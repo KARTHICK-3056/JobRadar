@@ -62,23 +62,23 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   ].filter(Boolean) as { key: string; label: string }[];
 
   return (
-    <div className="space-y-3 mb-6">
+    <div className="space-y-3 mb-5">
       {/* Top Controls Row */}
-      <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+      <div className="flex flex-col lg:flex-row gap-2.5 items-stretch lg:items-center justify-between">
         {/* Search Input */}
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
             value={q}
             onChange={(e) => updateParam('q', e.target.value)}
-            placeholder="Search by role, company, or skills..."
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-surface/80 border border-border text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-cyan-500/40"
+            placeholder="Search listings..."
+            className="w-full pl-9 pr-8 py-1.5 rounded-lg bg-surface border border-border text-xs text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-accent"
           />
           {q && (
             <button
               onClick={() => removeFilter('q')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-muted-foreground hover:text-foreground"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -91,9 +91,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <select
             value={company}
             onChange={(e) => updateParam('company', e.target.value)}
-            className="px-3 py-2 rounded-xl bg-surface/80 border border-border text-xs text-foreground outline-none focus:ring-2 focus:ring-cyan-500/40"
+            className="px-2.5 py-1.5 rounded-lg bg-surface border border-border text-xs text-secondary outline-none focus:ring-1 focus:ring-accent"
           >
-            <option value="">All Companies</option>
+            <option value="">All companies</option>
             {companies.map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -105,9 +105,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <select
             value={source}
             onChange={(e) => updateParam('source', e.target.value)}
-            className="px-3 py-2 rounded-xl bg-surface/80 border border-border text-xs text-foreground outline-none focus:ring-2 focus:ring-cyan-500/40"
+            className="px-2.5 py-1.5 rounded-lg bg-surface border border-border text-xs text-secondary outline-none focus:ring-1 focus:ring-accent"
           >
-            <option value="">All Sources</option>
+            <option value="">All sources</option>
             {sources.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
@@ -119,9 +119,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <select
             value={location}
             onChange={(e) => updateParam('location', e.target.value)}
-            className="px-3 py-2 rounded-xl bg-surface/80 border border-border text-xs text-foreground outline-none focus:ring-2 focus:ring-cyan-500/40"
+            className="px-2.5 py-1.5 rounded-lg bg-surface border border-border text-xs text-secondary outline-none focus:ring-1 focus:ring-accent"
           >
-            <option value="">All Locations</option>
+            <option value="">All locations</option>
             {locations.map((loc) => (
               <option key={loc} value={loc}>
                 {loc}
@@ -133,22 +133,22 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <select
             value={status}
             onChange={(e) => updateParam('status', e.target.value)}
-            className="px-3 py-2 rounded-xl bg-surface/80 border border-border text-xs text-foreground outline-none focus:ring-2 focus:ring-cyan-500/40"
+            className="px-2.5 py-1.5 rounded-lg bg-surface border border-border text-xs text-secondary outline-none focus:ring-1 focus:ring-accent"
           >
-            <option value="">All Statuses</option>
-            <option value="active">Active Only</option>
-            <option value="removed">Removed (Confirmed)</option>
+            <option value="">All status</option>
+            <option value="active">Active only</option>
+            <option value="removed">Removed only</option>
           </select>
 
           {/* Change Category */}
           <select
             value={changeCategory}
             onChange={(e) => updateParam('change_category', e.target.value)}
-            className="px-3 py-2 rounded-xl bg-surface/80 border border-border text-xs text-foreground outline-none focus:ring-2 focus:ring-cyan-500/40"
+            className="px-2.5 py-1.5 rounded-lg bg-surface border border-border text-xs text-secondary outline-none focus:ring-1 focus:ring-accent"
           >
-            <option value="">All Activity</option>
-            <option value="added">New Listings</option>
-            <option value="edited">Changed Listings</option>
+            <option value="">All activity</option>
+            <option value="added">New</option>
+            <option value="edited">Edited</option>
             <option value="removed">Removed</option>
           </select>
 
@@ -156,38 +156,38 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           <select
             value={sort}
             onChange={(e) => updateParam('sort', e.target.value)}
-            className="px-3 py-2 rounded-xl bg-surface/80 border border-border text-xs text-foreground outline-none focus:ring-2 focus:ring-cyan-500/40 font-medium"
+            className="px-2.5 py-1.5 rounded-lg bg-surface border border-border text-xs text-secondary outline-none focus:ring-1 focus:ring-accent"
           >
-            <option value="newest">Newest First</option>
-            <option value="closing_soon">Closing Soon</option>
+            <option value="newest">Newest first</option>
+            <option value="closing_soon">Closing soon</option>
             <option value="company_asc">Company (A-Z)</option>
           </select>
 
           {/* Grid / Table Toggle */}
-          <div className="flex items-center rounded-xl border border-border bg-surface/60 p-0.5">
+          <div className="flex items-center rounded-lg border border-border bg-surface p-0.5">
             <button
               onClick={() => onViewModeChange('grid')}
-              className={`p-1.5 rounded-lg transition-colors ${
+              className={`p-1 rounded-md transition-colors ${
                 viewMode === 'grid'
-                  ? 'bg-cyan-500/20 text-cyan-400'
+                  ? 'bg-surface-elevated text-foreground'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
               title="Grid view"
               aria-label="Grid view"
             >
-              <LayoutGrid className="w-4 h-4" />
+              <LayoutGrid className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => onViewModeChange('table')}
-              className={`p-1.5 rounded-lg transition-colors ${
+              className={`p-1 rounded-md transition-colors ${
                 viewMode === 'table'
-                  ? 'bg-cyan-500/20 text-cyan-400'
+                  ? 'bg-surface-elevated text-foreground'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
               title="Table view"
               aria-label="Table view"
             >
-              <Table className="w-4 h-4" />
+              <Table className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -195,34 +195,34 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
       {/* Active Filter Chips */}
       {activeFilters.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 pt-1 animate-in fade-in duration-150">
-          <span className="text-xs text-muted-foreground font-mono flex items-center gap-1">
-            <SlidersHorizontal className="w-3 h-3 text-cyan-400" />
-            Active filters:
+        <div className="flex flex-wrap items-center gap-1.5 pt-1">
+          <span className="text-[11px] text-muted-foreground font-mono flex items-center gap-1">
+            <SlidersHorizontal className="w-3 h-3 text-secondary" />
+            Filters:
           </span>
 
           {activeFilters.map((f) => (
             <span
               key={f.key}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-500/25"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono bg-surface border border-border text-secondary"
             >
               <span>{f.label}</span>
               <button
                 onClick={() => removeFilter(f.key)}
-                className="hover:text-white p-0.5"
+                className="hover:text-foreground p-0.5"
                 aria-label={`Remove filter ${f.label}`}
               >
-                <X className="w-3 h-3" />
+                <X className="w-2.5 h-2.5" />
               </button>
             </span>
           ))}
 
           <button
             onClick={clearAllFilters}
-            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-rose-400 transition-colors ml-2 font-medium"
+            className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors ml-1 font-mono"
           >
             <RotateCcw className="w-3 h-3" />
-            Clear all
+            Clear
           </button>
         </div>
       )}

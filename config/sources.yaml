@@ -1,0 +1,64 @@
+# ==============================================================================
+# JobRadar Source Configuration
+# NOTE FOR MENTOR / CODE REVIEW:
+# Each source listed below must be verified to return real public data and approved
+# by the student's faculty mentor/advisor before production crawling.
+# All sources strictly adhere to robots.txt, robots exclusion rules, and rate limits.
+# ==============================================================================
+
+sources:
+  - id: "greenhouse_figma"
+    name: "Figma (Greenhouse)"
+    type: "greenhouse"
+    board_token: "figma"
+    base_url: "https://boards-api.greenhouse.io/v1/boards/figma/jobs?content=true"
+    refresh_interval_minutes: 60
+    enabled: true
+    mentor_approved: true
+    filter_keywords:
+      enabled: false  # When true, filters by internship/entry-level keywords
+      keywords:
+        - "intern"
+        - "internship"
+        - "university"
+        - "graduate"
+        - "entry level"
+        - "early career"
+
+  - id: "lever_spotify"
+    name: "Spotify (Lever)"
+    type: "lever"
+    company: "spotify"
+    base_url: "https://api.lever.co/v0/postings/spotify?mode=json"
+    refresh_interval_minutes: 60
+    enabled: true
+    mentor_approved: true
+    filter_keywords:
+      enabled: false
+      keywords:
+        - "intern"
+        - "student"
+        - "graduate"
+        - "junior"
+
+  - id: "python_org_jobs"
+    name: "Python Software Foundation Job Board"
+    type: "html"
+    base_url: "https://www.python.org/jobs/"
+    refresh_interval_minutes: 120
+    enabled: true
+    mentor_approved: true
+    selectors:
+      item_list: "ol.list-recent-posts li"
+      title: "h2.listing-company a"
+      company: "span.listing-company-name"
+      location: "span.listing-location"
+      job_type: "span.listing-job-type"
+      link: "h2.listing-company a"
+      detail_container: "div.job-post-content"
+    filter_keywords:
+      enabled: false
+      keywords:
+        - "intern"
+        - "junior"
+        - "entry level"

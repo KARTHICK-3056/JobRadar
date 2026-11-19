@@ -45,6 +45,24 @@ COMPANY_METADATA: Dict[str, Dict[str, Any]] = {
         "location": "Boston, MA",
         "about": "BioTech Labs creates computational biology tools and laboratory data pipelines to accelerate genomic discoveries.",
     },
+    "meesho": {
+        "id": "meesho",
+        "name": "Meesho",
+        "tone": 4,
+        "industry": "E-Commerce & Social Commerce",
+        "size": "2,000+ people",
+        "location": "Bengaluru, Karnataka, India",
+        "about": "Meesho is India's premier social commerce and e-commerce marketplace platform, democratizing internet commerce for small businesses across Bharat.",
+    },
+    "groww": {
+        "id": "groww",
+        "name": "Groww",
+        "tone": 5,
+        "industry": "Fintech & Investing",
+        "size": "1,500+ people",
+        "location": "Bengaluru, Karnataka, India",
+        "about": "Groww is India's leading fintech platform empowering millions of investors with transparent, effortless investing in stocks, mutual funds, and digital gold.",
+    },
 }
 
 COMMON_BENEFITS = [
@@ -68,6 +86,10 @@ def infer_company_id(company_name: str) -> str:
         return "figma"
     if "spotify" in c_lower:
         return "spotify"
+    if "meesho" in c_lower:
+        return "meesho"
+    if "groww" in c_lower:
+        return "groww"
     if "acme" in c_lower or "robot" in c_lower:
         return "acme-robotics"
     if "bio" in c_lower:
@@ -352,7 +374,16 @@ export function filterJobs(list: Job[], f: JobFilters): Job[] {{
       if (!hay.includes(q)) return false;
     }}
     if (loc) {{
-      const matchesLoc = job.location.toLowerCase().includes(loc) || (job.remote && "remote".includes(loc));
+      const isIndiaQuery = loc === "india" || loc.includes("india");
+      const indiaKeywords = ["bengaluru", "bangalore", "karnataka", "hyderabad", "pune", "mumbai", "delhi", "gurgaon", "gurugram", "noida", "chennai", "india"];
+      const jobLoc = job.location.toLowerCase();
+      let matchesLoc = jobLoc.includes(loc) || (job.remote && "remote".includes(loc));
+      if (isIndiaQuery && indiaKeywords.some((k) => jobLoc.includes(k))) {{
+        matchesLoc = true;
+      }}
+      if ((loc.includes("bangalore") || loc.includes("bengaluru")) && (jobLoc.includes("bangalore") || jobLoc.includes("bengaluru"))) {{
+        matchesLoc = true;
+      }}
       if (!matchesLoc) return false;
     }}
     if (f.category && job.category !== f.category) return false;
@@ -366,14 +397,24 @@ export function filterJobs(list: Job[], f: JobFilters): Job[] {{
 """
 
 
-def sync_to_frontend(db: Session, target_path: str = "frontend_new/src/lib/jobs.ts") -> None:
-    """Sync mapped database models into the frontend_new jobs.ts file."""
-    path = Path(target_path)
-    if not path.parent.exists():
-        return
+def sync_to_frontend(db: Session, target_path: str | None = None) -> None:
+    """Sync mapped database models into frontend jobs.ts files."""
     companies, jobs = get_mapped_companies_and_jobs(db)
     content = generate_jobs_ts_content(companies, jobs)
-    path.write_text(content, encoding="utf-8")
+
+    candidates = [
+        Path(target_path) if target_path else None,
+        Path("frontend_new/src/lib/jobs.ts"),
+        Path("frontend/src/lib/jobs.ts"),
+    ]
+    synced = set()
+    for p in candidates:
+        if p and p.parent.exists():
+            resolved = p.resolve()
+            if resolved not in synced:
+                p.write_text(content, encoding="utf-8")
+                synced.add(resolved)
+
 
 
 def get_frontend_jobs(db: Session) -> List[Dict[str, Any]]:

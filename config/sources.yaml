@@ -41,6 +41,28 @@ sources:
         - "graduate"
         - "junior"
 
+  - id: "lever_meesho"
+    name: "Meesho (Lever India)"
+    type: "lever"
+    company: "meesho"
+    base_url: "https://api.lever.co/v0/postings/meesho?mode=json"
+    refresh_interval_minutes: 60
+    enabled: true
+    mentor_approved: true
+    filter_keywords:
+      enabled: false
+
+  - id: "greenhouse_groww"
+    name: "Groww (Greenhouse India)"
+    type: "greenhouse"
+    board_token: "groww"
+    base_url: "https://boards-api.greenhouse.io/v1/boards/groww/jobs?content=true"
+    refresh_interval_minutes: 60
+    enabled: true
+    mentor_approved: true
+    filter_keywords:
+      enabled: false
+
   - id: "python_org_jobs"
     name: "Python Software Foundation Job Board"
     type: "html"

@@ -1,0 +1,20 @@
+{
+  "run_id": "5f0adc53-4150-4fc2-be0d-ce6c4a1c143f",
+  "source_id": "rate_limited_source",
+  "mode": "live",
+  "status": "rate_limited",
+  "started_at": "2026-11-19T11:52:14.952162",
+  "finished_at": "2026-11-19T11:52:14.953665",
+  "source_url": "https://example.com/api/jobs",
+  "http_status": null,
+  "parsed_count": 0,
+  "failed_count": 0,
+  "new_count": 0,
+  "updated_count": 0,
+  "removed_count": 0,
+  "duplicate_count": 0,
+  "warnings": [
+    "Source returned HTTP 429 Too Many Requests (Retry-After: 30s)"
+  ],
+  "error_message": "Source returned HTTP 429 Too Many Requests (Retry-After: 30s)"
+}

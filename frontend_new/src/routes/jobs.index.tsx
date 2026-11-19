@@ -24,7 +24,7 @@ const str = (v: unknown) => (typeof v === "string" && v.trim() ? v : undefined);
 export const Route = createFileRoute("/jobs/")({
   validateSearch: (s: Record<string, unknown>): JobsSearch => ({
     q: str(s["q"]),
-    location: str(s["location"]),
+    location: s["location"] === "all" ? undefined : (str(s["location"]) ?? "India"),
     category: str(s["category"]),
     types: Array.isArray(s["types"]) ? (s["types"].filter((t) => jobTypes.includes(t)) as JobType[]) : undefined,
     levels: Array.isArray(s["levels"]) ? (s["levels"].filter((l) => levels.includes(l)) as Level[]) : undefined,
@@ -95,7 +95,7 @@ function JobsPage() {
         className="mt-8"
         defaultQ={search.q}
         defaultLocation={search.location}
-        onSearch={(q, location) => update({ q: q || undefined, location: location || undefined })}
+        onSearch={(q, location) => update({ q: q || undefined, location: location ? location : "all" })}
       />
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[260px_1fr]">
@@ -212,7 +212,7 @@ function JobsPage() {
           {(search.q || search.location || activeCount > 0) && (
             <div className="mb-5 flex flex-wrap gap-2">
               {search.q && <ActiveTag onRemove={() => update({ q: undefined })}>“{search.q}”</ActiveTag>}
-              {search.location && <ActiveTag onRemove={() => update({ location: undefined })}>{search.location}</ActiveTag>}
+              {search.location && <ActiveTag onRemove={() => update({ location: "all" })}>{search.location}</ActiveTag>}
               {search.category && <ActiveTag onRemove={() => update({ category: undefined })}>{search.category}</ActiveTag>}
               {search.remote && <ActiveTag onRemove={() => update({ remote: undefined })}>Remote</ActiveTag>}
               {search.types?.map((t) => (

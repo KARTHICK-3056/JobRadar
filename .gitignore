@@ -45,8 +45,10 @@ junit.xml
 Thumbs.db
 
 # Frontend
+/frontend
 node_modules/
 .output/
 .nitro/
 dist/
+
 

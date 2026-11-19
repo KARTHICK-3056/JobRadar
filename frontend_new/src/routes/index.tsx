@@ -29,7 +29,7 @@ const categoryIcons = {
   users: Users,
 } as const;
 
-const popular = ["Designer", "React", "Remote", "Product", "Data"];
+const popular = ["Bengaluru", "Remote", "Engineering", "Internship", "Design"];
 
 function Index() {
   const featured = [...jobs].sort((a, b) => a.postedDaysAgo - b.postedDaysAgo).slice(0, 5);
@@ -43,7 +43,7 @@ function Index() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="animate-rise inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-soft">
               <span className="size-1.5 rounded-full bg-highlight ring-4 ring-highlight/30" />
-              {jobs.length * 107} new roles this week
+              {jobs.length} live verified roles tracked
             </span>
             <h1 className="animate-rise mt-6 font-display text-5xl leading-[1.02] text-foreground [animation-delay:80ms] sm:text-6xl md:text-7xl">
               Find work that <em className="marker-highlight italic">fits</em> your life.
@@ -54,14 +54,18 @@ function Index() {
           </div>
 
           <div className="animate-rise mx-auto mt-10 max-w-3xl [animation-delay:240ms]">
-            <SearchBar />
+            <SearchBar defaultLocation="India" />
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-sm">
               <span className="text-muted-foreground">Popular:</span>
               {popular.map((term) => (
                 <Link
                   key={term}
                   to="/jobs"
-                  search={{ q: term === "Remote" ? undefined : term, remote: term === "Remote" ? true : undefined }}
+                  search={{
+                    q: term === "Bengaluru" || term === "Remote" ? undefined : term,
+                    location: term === "Bengaluru" ? "Bengaluru" : "India",
+                    remote: term === "Remote" ? true : undefined,
+                  }}
                   className="rounded-full border border-border bg-card px-3 py-1 font-medium text-foreground transition-colors hover:border-foreground/30"
                 >
                   {term}

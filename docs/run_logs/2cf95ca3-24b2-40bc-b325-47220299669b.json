@@ -1,0 +1,18 @@
+{
+  "run_id": "2cf95ca3-24b2-40bc-b325-47220299669b",
+  "source_id": "greenhouse_figma",
+  "mode": "live",
+  "status": "success",
+  "started_at": "2026-11-19T08:43:20.722493+00:00",
+  "finished_at": "2026-11-19T08:43:21.628325+00:00",
+  "source_url": "https://boards-api.greenhouse.io/v1/boards/figma/jobs?content=true",
+  "http_status": 200,
+  "parsed_count": 143,
+  "failed_count": 0,
+  "new_count": 0,
+  "updated_count": 0,
+  "removed_count": 0,
+  "duplicate_count": 143,
+  "warnings": [],
+  "error_message": null
+}

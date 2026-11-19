@@ -1,0 +1,18 @@
+{
+  "run_id": "9dc87d8f-6344-48b3-ae75-cabe0f898365",
+  "source_id": "python_jobs_test",
+  "mode": "fixture",
+  "status": "success",
+  "started_at": "2026-11-19T08:43:01.876449",
+  "finished_at": "2026-11-19T08:43:01.884450",
+  "source_url": "https://www.python.org/jobs/",
+  "http_status": 200,
+  "parsed_count": 2,
+  "failed_count": 0,
+  "new_count": 2,
+  "updated_count": 0,
+  "removed_count": 0,
+  "duplicate_count": 0,
+  "warnings": [],
+  "error_message": null
+}

@@ -1,0 +1,26 @@
+{
+  "name": "jobradar",
+  "version": "2.0.0",
+  "private": true,
+  "description": "JobRadar: versioned change-tracking for student jobs and internships. Real jobs only, scraped from public ATS boards and feeds.",
+  "type": "module",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node scripts/start.js",
+    "dev": "node scripts/start.js",
+    "api": "node --disable-warning=ExperimentalWarning server/index.js",
+    "scrape": "node --disable-warning=ExperimentalWarning scripts/scrape.js",
+    "verify-companies": "node --disable-warning=ExperimentalWarning scripts/verify-companies.js",
+    "test": "node --disable-warning=ExperimentalWarning --test \"tests/*.test.js\"",
+    "postinstall": "npm --prefix frontend install --no-audit --no-fund"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "mammoth": "^1.8.0",
+    "multer": "^2.0.2",
+    "node-cron": "^3.0.3",
+    "pdf-parse": "1.1.1"
+  }
+}

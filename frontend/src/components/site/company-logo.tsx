@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
-import type { Company } from "@/lib/jobs";
+import type { Tone } from "@/lib/jobs";
 
-const toneClass: Record<Company["tone"], string> = {
+const toneClass: Record<Tone, string> = {
   1: "bg-tone-1",
   2: "bg-tone-2",
   3: "bg-tone-3",
@@ -10,7 +10,7 @@ const toneClass: Record<Company["tone"], string> = {
   6: "bg-tone-6",
 };
 
-export function CompanyLogo({ company, size = "md" }: { company: Company; size?: "sm" | "md" | "lg" }) {
+export function CompanyLogo({ company, size = "md" }: { company: { name: string; tone: Tone }; size?: "sm" | "md" | "lg" }) {
   const initials = company.name
     .split(" ")
     .map((w) => w[0])
@@ -21,7 +21,7 @@ export function CompanyLogo({ company, size = "md" }: { company: Company; size?:
       aria-hidden
       className={cn(
         "flex shrink-0 items-center justify-center rounded-xl font-display text-tone-ink",
-        toneClass[company.tone],
+        toneClass[company.tone] ?? toneClass[3],
         size === "sm" && "size-9 text-base",
         size === "md" && "size-12 text-xl",
         size === "lg" && "size-16 text-3xl rounded-2xl",

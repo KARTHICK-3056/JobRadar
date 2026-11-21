@@ -4,8 +4,12 @@ export default defineConfig({
   vite: {
     server: {
       proxy: {
+        "/health": {
+          target: `http://127.0.0.1:${process.env["API_PORT"] ?? 8787}`,
+          changeOrigin: true,
+        },
         "/api": {
-          target: "http://127.0.0.1:8000",
+          target: `http://127.0.0.1:${process.env["API_PORT"] ?? 8787}`,
           changeOrigin: true,
         },
       },

@@ -2,23 +2,25 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Search, MapPin, ArrowRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { jobs } from "@/lib/jobs";
+import { useRegions, type RegionOption } from "@/lib/api";
+import { regionId } from "@/lib/use-region";
 
-const PRESET_INDIAN_LOCATIONS = [
-  "India",
-  "Bengaluru, Karnataka",
-  "Hyderabad, Telangana",
-  "Pune, Maharashtra",
-  "Mumbai, Maharashtra",
-  "Gurgaon / Delhi NCR",
-  "Noida, Uttar Pradesh",
-  "Chennai, Tamil Nadu",
-  "Remote (India)",
+// Shown before /api/regions answers (and as a safety net if it fails).
+const FALLBACK_OPTIONS: RegionOption[] = [
+  { id: "Global", label: "Global (top results)", group: "Popular", kind: "global" },
+  { id: "India", label: "India (all)", group: "Popular", kind: "india" },
+  { id: "Remote", label: "Remote", group: "Popular", kind: "remote" },
+  { id: "Chennai", label: "Chennai", group: "India", kind: "city" },
+  { id: "Bengaluru", label: "Bengaluru", group: "India", kind: "city" },
 ];
+
+type Opt = RegionOption & { aliases?: string[] };
+
+const labelFor = (opts: Opt[], value: string) => opts.find((o) => o.id.toLowerCase() === regionId(value).toLowerCase())?.label ?? value;
 
 export function SearchBar({
   defaultQ = "",
-  defaultLocation = "India",
+  defaultLocation = "Chennai",
   className,
   onSearch,
 }: {
@@ -28,75 +30,74 @@ export function SearchBar({
   onSearch?: (q: string, location: string) => void;
 }) {
   const navigate = useNavigate();
+  const { data } = useRegions();
+  const options: Opt[] = (data?.regions as Opt[] | undefined) ?? FALLBACK_OPTIONS;
   const [q, setQ] = useState(defaultQ);
-  const [location, setLocation] = useState(defaultLocation);
+  const [selected, setSelected] = useState(regionId(defaultLocation));
+  const [text, setText] = useState(() => labelFor(options, defaultLocation));
+  const [typing, setTyping] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const locationWrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Collect all unique locations from active jobs + curated Indian hubs
-  const allLocations = useMemo(() => {
-    const fromJobs = jobs
-      .map((j) => j.location)
-      .filter((l): l is string => Boolean(l && l.trim()));
-    const set = new Set<string>([...PRESET_INDIAN_LOCATIONS, ...fromJobs]);
-    return Array.from(set);
-  }, []);
+  // Once region labels arrive, show the friendly label for the current selection.
+  useEffect(() => {
+    if (!typing) setText(labelFor(options, selected));
+  }, [data, selected, typing]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Filter suggestions based on typed text
+  // Searchable: match id, label and aliases (Bangalore -> Bengaluru, Gurgaon -> Delhi NCR...).
   const suggestions = useMemo(() => {
-    const query = location.trim().toLowerCase();
-    if (!query) {
-      return PRESET_INDIAN_LOCATIONS;
-    }
-    return allLocations.filter((loc) => {
-      const lLower = loc.toLowerCase();
-      if (lLower.includes(query)) return true;
-      if (query.includes("bangalore") && lLower.includes("bengaluru")) return true;
-      if (query.includes("bengaluru") && lLower.includes("bangalore")) return true;
-      return false;
-    });
-  }, [location, allLocations]);
+    const query = typing ? text.trim().toLowerCase() : "";
+    if (!query) return options;
+    return options.filter(
+      (o) =>
+        o.label.toLowerCase().includes(query) ||
+        o.id.toLowerCase().includes(query) ||
+        (o.aliases ?? []).some((a) => a.includes(query) || query.includes(a)),
+    );
+  }, [text, typing, options]);
 
-  // Click outside listener
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        locationWrapperRef.current &&
-        !locationWrapperRef.current.contains(event.target as Node)
-      ) {
+      if (locationWrapperRef.current && !locationWrapperRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
         setSelectedIndex(-1);
+        setTyping(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const selectSuggestion = (selectedLoc: string) => {
-    setLocation(selectedLoc);
+  const go = (query: string, loc: string) => {
+    if (onSearch) return onSearch(query, loc);
+    navigate({ to: "/jobs", search: { q: query || undefined, location: loc || undefined } });
+  };
+
+  const selectSuggestion = (opt: Opt) => {
+    setSelected(opt.id);
+    setText(opt.label);
+    setTyping(false);
     setShowSuggestions(false);
     setSelectedIndex(-1);
-    if (onSearch) {
-      onSearch(q, selectedLoc);
-    } else {
-      navigate({
-        to: "/jobs",
-        search: { q: q || undefined, location: selectedLoc || undefined },
-      });
-    }
+    go(q, opt.id);
   };
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setShowSuggestions(false);
-    if (onSearch) return onSearch(q, location);
-    navigate({
-      to: "/jobs",
-      search: { q: q || undefined, location: location || undefined },
-    });
+    // Free text resolves to the best matching option; otherwise it is passed through (server resolves aliases).
+    let loc = selected;
+    if (typing && text.trim()) {
+      loc = suggestions[0]?.id ?? text.trim();
+      setSelected(loc);
+      setTyping(false);
+    }
+    go(q, loc);
   };
+
+  let lastGroup = "";
 
   return (
     <form
@@ -120,17 +121,22 @@ export function SearchBar({
 
       <div className="hidden h-8 w-px bg-border sm:block" />
 
-      {/* Location Input with Autocomplete Suggestions */}
+      {/* Location combobox */}
       <div ref={locationWrapperRef} className="relative z-30 flex-1">
         <label className="flex items-center gap-3 rounded-full px-4 py-3 transition-colors focus-within:bg-muted">
           <MapPin className="size-5 shrink-0 text-primary" />
           <span className="sr-only">Location</span>
           <input
             ref={inputRef}
-            value={location}
-            onFocus={() => setShowSuggestions(true)}
+            role="combobox"
+            value={text}
+            onFocus={(e) => {
+              setShowSuggestions(true);
+              e.currentTarget.select();
+            }}
             onChange={(e) => {
-              setLocation(e.target.value);
+              setText(e.target.value);
+              setTyping(true);
               setShowSuggestions(true);
               setSelectedIndex(-1);
             }}
@@ -146,12 +152,13 @@ export function SearchBar({
                 } else if (e.key === "ArrowUp") {
                   e.preventDefault();
                   setSelectedIndex((prev) => (prev <= 0 ? suggestions.length - 1 : prev - 1));
-                } else if (e.key === "Enter" && selectedIndex >= 0) {
+                } else if (e.key === "Enter" && selectedIndex >= 0 && suggestions[selectedIndex]) {
                   e.preventDefault();
-                  selectSuggestion(suggestions[selectedIndex]);
+                  selectSuggestion(suggestions[selectedIndex]!);
                 } else if (e.key === "Escape") {
                   setShowSuggestions(false);
                   setSelectedIndex(-1);
+                  setTyping(false);
                 }
               }
             }}
@@ -160,37 +167,46 @@ export function SearchBar({
             autoComplete="off"
             aria-autocomplete="list"
             aria-expanded={showSuggestions}
+            aria-controls="location-options"
           />
         </label>
 
-        {/* Suggestions Popover */}
         {showSuggestions && suggestions.length > 0 && (
           <div
-            className="absolute left-0 right-0 sm:left-0 sm:right-auto sm:min-w-[320px] top-full z-50 mt-2 max-h-64 overflow-y-auto rounded-2xl border border-border bg-popover text-popover-foreground p-1.5 shadow-2xl"
+            id="location-options"
+            role="listbox"
+            className="absolute left-0 right-0 sm:left-0 sm:right-auto sm:min-w-[320px] top-full z-50 mt-2 max-h-72 overflow-y-auto rounded-2xl border border-border bg-popover text-popover-foreground p-1.5 shadow-2xl"
           >
-            <div className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Location suggestions
-            </div>
             {suggestions.map((item, idx) => {
               const isSelected = selectedIndex === idx;
-              const isCurrent = location.trim().toLowerCase() === item.toLowerCase();
+              const isCurrent = selected.toLowerCase() === item.id.toLowerCase();
+              const header = item.group !== lastGroup ? item.group : null;
+              lastGroup = item.group;
               return (
-                <button
-                  type="button"
-                  key={item}
-                  onClick={() => selectSuggestion(item)}
-                  onMouseEnter={() => setSelectedIndex(idx)}
-                  className={cn(
-                    "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-colors",
-                    isSelected ? "bg-muted font-medium text-foreground" : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                <div key={item.id}>
+                  {header && (
+                    <div className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      {header === "Popular" ? "Location suggestions" : header}
+                    </div>
                   )}
-                >
-                  <span className="flex items-center gap-2.5">
-                    <MapPin className={cn("size-4 shrink-0", isCurrent ? "text-primary" : "text-muted-foreground")} />
-                    <span>{item}</span>
-                  </span>
-                  {isCurrent && <Check className="size-4 text-primary" />}
-                </button>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={isCurrent}
+                    onClick={() => selectSuggestion(item)}
+                    onMouseEnter={() => setSelectedIndex(idx)}
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-colors",
+                      isSelected ? "bg-muted font-medium text-foreground" : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                    )}
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <MapPin className={cn("size-4 shrink-0", isCurrent ? "text-primary" : "text-muted-foreground")} />
+                      <span>{item.label}</span>
+                    </span>
+                    {isCurrent && <Check className="size-4 text-primary" />}
+                  </button>
+                </div>
               );
             })}
           </div>

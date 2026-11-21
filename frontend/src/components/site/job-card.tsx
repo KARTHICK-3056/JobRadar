@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Clock } from "lucide-react";
-import { formatPosted, formatSalary, getCompany, type Job } from "@/lib/jobs";
+import { formatPosted, formatSalary, toneFor, type Job } from "@/lib/jobs";
 import { CompanyLogo } from "./company-logo";
 import { SaveButton } from "./save-button";
 
 export function JobCard({ job }: { job: Job }) {
-  const company = getCompany(job.companyId);
+  const company = { name: job.company, tone: toneFor(job.company_id) };
   return (
     <Link
       to="/jobs/$jobId"
@@ -19,7 +19,7 @@ export function JobCard({ job }: { job: Job }) {
           <span aria-hidden>·</span>
           <span className="inline-flex items-center gap-1">
             <Clock className="size-3.5" />
-            {formatPosted(job.postedDaysAgo)}
+            {formatPosted(job.posted_days_ago)}
           </span>
         </div>
         <h3 className="mt-1 text-lg font-semibold tracking-tight text-foreground group-hover:underline group-hover:decoration-highlight group-hover:decoration-[3px] group-hover:underline-offset-4">
@@ -30,13 +30,23 @@ export function JobCard({ job }: { job: Job }) {
             <MapPin className="size-3.5" />
             {job.location}
           </Chip>
-          {job.remote && job.location !== "Remote" && <Chip>Remote friendly</Chip>}
-          <Chip>{job.type}</Chip>
-          <Chip>{job.level}</Chip>
+          {job.is_remote && !/^remote/i.test(job.location) && <Chip>Remote friendly</Chip>}
+          <Chip>{job.job_type}</Chip>
+          <Chip>{job.seniority}</Chip>
+          {job.match_score != null && (
+            <span
+              title={job.matched_skills?.length ? `Matches: ${job.matched_skills.join(", ")}` : "No overlapping skills"}
+              className="inline-flex items-center gap-1 rounded-full bg-highlight px-2.5 py-1 text-xs font-semibold text-highlight-foreground"
+            >
+              {job.match_score}% match
+            </span>
+          )}
         </div>
       </div>
       <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end">
-        <span className="text-sm font-semibold text-foreground">{formatSalary(job)}</span>
+        <span className={job.salary_display ? "text-sm font-semibold text-foreground" : "text-sm font-medium text-muted-foreground"}>
+          {formatSalary(job)}
+        </span>
         <SaveButton jobId={job.id} title={job.title} />
       </div>
     </Link>

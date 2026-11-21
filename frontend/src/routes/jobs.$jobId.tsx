@@ -1,29 +1,35 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useState } from "react";
 import { ArrowLeft, MapPin, Briefcase, Clock, Wallet, Check, Building2, Users } from "lucide-react";
-import { toast } from "sonner";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CompanyLogo } from "@/components/site/company-logo";
 import { SaveButton } from "@/components/site/save-button";
 import { JobCard, Chip } from "@/components/site/job-card";
-import { formatPosted, formatSalary, getCompany, getJob, jobs } from "@/lib/jobs";
+import { api, ApiError, jobDetailPath, useJob, useJobs } from "@/lib/api";
+import { formatPosted, formatSalary, sourceLabel, toneFor, type JobDetail } from "@/lib/jobs";
+import { useRegion } from "@/lib/use-region";
+import { useResume } from "@/lib/use-resume";
 
 export const Route = createFileRoute("/jobs/$jobId")({
-  loader: ({ params }) => {
-    const job = getJob(params.jobId);
-    if (!job) throw notFound();
-    return { job, company: getCompany(job.companyId) };
+  // Server-side fetch for the page title and a proper "closed" page; region-specific salary is fetched on the client.
+  loader: async ({ params }) => {
+    try {
+      const job = await api<JobDetail>(jobDetailPath(params.jobId));
+      if (job.status === "closed") throw notFound();
+      return { title: job.title, company: job.company, summary: job.description_blocks.find((b) => b.t === "p")?.x ?? job.title };
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) throw notFound();
+      throw err;
+    }
   },
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Job not found — JobRadar" }, { name: "robots", content: "noindex" }] };
-    const { job, company } = loaderData;
-    const title = `${job.title} at ${company.name} — JobRadar`;
+    const title = `${loaderData.title} at ${loaderData.company} — JobRadar`;
+    const description = loaderData.summary.slice(0, 160);
     return {
       meta: [
         { title },
-        { name: "description", content: job.summary },
+        { name: "description", content: description },
         { property: "og:title", content: title },
-        { property: "og:description", content: job.summary },
+        { property: "og:description", content: description },
         { property: "og:type", content: "article" },
         { name: "twitter:card", content: "summary_large_image" },
       ],
@@ -41,10 +47,53 @@ export const Route = createFileRoute("/jobs/$jobId")({
   component: JobPage,
 });
 
+/** Split scraped description blocks into an intro paragraph and titled sections of paragraphs/bullets. */
+function toSections(blocks: JobDetail["description_blocks"]) {
+  const intro = blocks.find((b) => b.t === "p")?.x ?? "";
+  const sections: { title: string; items: { t: "p" | "li"; x: string }[] }[] = [];
+  let cur: (typeof sections)[number] | null = null;
+  let skippedIntro = false;
+  for (const b of blocks) {
+    if (b.t === "p" && !skippedIntro && b.x === intro) {
+      skippedIntro = true;
+      continue;
+    }
+    if (b.t === "h") {
+      cur = { title: b.x, items: [] };
+      sections.push(cur);
+    } else {
+      if (!cur) {
+        cur = { title: "About the role", items: [] };
+        sections.push(cur);
+      }
+      cur.items.push({ t: b.t, x: b.x });
+    }
+  }
+  return { intro, sections: sections.filter((s) => s.items.length) };
+}
+
 function JobPage() {
-  const { job, company } = Route.useLoaderData();
-  const [applyOpen, setApplyOpen] = useState(false);
-  const similar = jobs.filter((j) => j.id !== job.id && j.category === job.category).slice(0, 3);
+  const { jobId } = Route.useParams();
+  const { region } = useRegion();
+  const { profile } = useResume();
+  const { data: job, isPending } = useJob(jobId, region, profile);
+  const { data: similarData } = useJobs({ category: job?.category, location: region, pageSize: 4 }, null, Boolean(job));
+  const similar = (similarData?.jobs ?? []).filter((j) => j.id !== jobId).slice(0, 3);
+
+  if (isPending || !job) {
+    return (
+      <div className="container-page pt-8 md:pt-12" aria-busy>
+        <div className="h-10 w-40 animate-pulse rounded-full bg-muted" />
+        <div className="mt-6 h-40 animate-pulse rounded-2xl bg-muted" />
+      </div>
+    );
+  }
+
+  const company = { name: job.company, tone: job.company_info?.tone ?? toneFor(job.company_id) };
+  const info = job.company_info;
+  const { intro, sections } = toSections(job.description_blocks);
+  const applyHref = job.apply_url ?? job.source_url ?? undefined;
+  const via = sourceLabel(job.source);
 
   return (
     <div className="container-page pt-8 md:pt-12">
@@ -53,7 +102,7 @@ function JobPage() {
       </Link>
 
       <div className="mt-6 grid gap-10 lg:grid-cols-[1fr_320px]">
-        <article>
+        <article className="min-w-0">
           <div className="flex items-start gap-4">
             <CompanyLogo company={company} size="lg" />
             <div>
@@ -63,20 +112,20 @@ function JobPage() {
           </div>
 
           <dl className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Fact icon={MapPin} label="Location" value={job.remote && job.location !== "Remote" ? `${job.location} · Remote` : job.location} />
-            <Fact icon={Briefcase} label="Type" value={`${job.type} · ${job.level}`} />
+            <Fact icon={MapPin} label="Location" value={job.is_remote && !/^remote/i.test(job.location) ? `${job.location} · Remote` : job.location} />
+            <Fact icon={Briefcase} label="Type" value={`${job.job_type} · ${job.seniority}`} />
             <Fact icon={Wallet} label="Salary" value={formatSalary(job)} />
-            <Fact icon={Clock} label="Posted" value={formatPosted(job.postedDaysAgo)} />
+            <Fact icon={Clock} label="Posted" value={formatPosted(job.posted_days_ago)} />
           </dl>
 
-          <p className="mt-10 text-xl leading-relaxed text-foreground">{job.summary}</p>
+          {intro && <p className="mt-10 text-xl leading-relaxed text-foreground">{intro}</p>}
 
-          <Section title="What you'll do" items={job.responsibilities} />
-          <Section title="What we're looking for" items={job.requirements} />
-          <Section title="What you'll get" items={job.benefits} />
+          {sections.map((s, i) => (
+            <Section key={`${s.title}-${i}`} title={s.title} items={s.items} />
+          ))}
 
           <div className="mt-10 flex flex-wrap gap-2">
-            {job.tags.map((t) => (
+            {job.skills.map((t) => (
               <Chip key={t}>{t}</Chip>
             ))}
           </div>
@@ -86,17 +135,25 @@ function JobPage() {
           <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
             <p className="text-sm text-muted-foreground">Salary range</p>
             <p className="mt-1 text-2xl font-semibold">{formatSalary(job)}</p>
-            <p className="text-sm text-muted-foreground">per year</p>
+            <p className="text-sm text-muted-foreground">{job.salary_display ? "per year" : "not published in the listing"}</p>
+            {job.match_score != null && (
+              <p className="mt-3 text-sm">
+                <span className="rounded-full bg-highlight px-2.5 py-1 text-xs font-semibold text-highlight-foreground">{job.match_score}% match</span>
+                {job.matched_skills?.length ? <span className="ml-2 text-muted-foreground">{job.matched_skills.join(", ")}</span> : null}
+              </p>
+            )}
             <div className="mt-6 flex gap-2">
-              <button
-                onClick={() => setApplyOpen(true)}
-                className="flex-1 rounded-full bg-primary px-5 py-3 font-semibold text-primary-foreground transition-transform hover:scale-[1.02]"
+              <a
+                href={applyHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 rounded-full bg-primary px-5 py-3 text-center font-semibold text-primary-foreground transition-transform hover:scale-[1.02]"
               >
                 Apply now
-              </button>
+              </a>
               <SaveButton jobId={job.id} title={job.title} className="size-12" />
             </div>
-            <p className="mt-3 text-center text-xs text-muted-foreground">Takes about a minute</p>
+            <p className="mt-3 text-center text-xs text-muted-foreground">Opens the original listing on {via}</p>
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-6">
@@ -104,11 +161,11 @@ function JobPage() {
               <CompanyLogo company={company} size="sm" />
               <p className="font-semibold">{company.name}</p>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{company.about}</p>
+            {info?.description && <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{info.description}</p>}
             <ul className="mt-4 space-y-2 text-sm">
-              <li className="flex items-center gap-2"><Building2 className="size-4 text-muted-foreground" />{company.industry}</li>
-              <li className="flex items-center gap-2"><Users className="size-4 text-muted-foreground" />{company.size}</li>
-              <li className="flex items-center gap-2"><MapPin className="size-4 text-muted-foreground" />{company.location}</li>
+              {info?.industry && <li className="flex items-center gap-2"><Building2 className="size-4 text-muted-foreground" />{info.industry}</li>}
+              <li className="flex items-center gap-2"><Users className="size-4 text-muted-foreground" />Listed on {via} · first seen {new Date(job.first_seen).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</li>
+              {info?.hq && <li className="flex items-center gap-2"><MapPin className="size-4 text-muted-foreground" />{info.hq}</li>}
             </ul>
           </div>
         </aside>
@@ -133,16 +190,16 @@ function JobPage() {
             <p className="text-xs text-muted-foreground">{formatSalary(job)}</p>
           </div>
           <SaveButton jobId={job.id} title={job.title} />
-          <button
-            onClick={() => setApplyOpen(true)}
+          <a
+            href={applyHref}
+            target="_blank"
+            rel="noopener noreferrer"
             className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
           >
             Apply now
-          </button>
+          </a>
         </div>
       </div>
-
-      <ApplyDialog open={applyOpen} onOpenChange={setApplyOpen} title={job.title} companyName={company.name} />
     </div>
   );
 }
@@ -158,78 +215,26 @@ function Fact({ icon: Icon, label, value }: { icon: typeof MapPin; label: string
   );
 }
 
-function Section({ title, items }: { title: string; items: string[] }) {
+function Section({ title, items }: { title: string; items: { t: "p" | "li"; x: string }[] }) {
   return (
     <section className="mt-10">
       <h2 className="text-lg font-semibold">{title}</h2>
       <ul className="mt-4 space-y-3">
-        {items.map((item) => (
-          <li key={item} className="flex gap-3 text-muted-foreground">
-            <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-highlight text-highlight-foreground">
-              <Check className="size-3" strokeWidth={3} />
-            </span>
-            <span className="text-foreground/80">{item}</span>
-          </li>
-        ))}
+        {items.map((item, i) =>
+          item.t === "li" ? (
+            <li key={i} className="flex gap-3 text-muted-foreground">
+              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-highlight text-highlight-foreground">
+                <Check className="size-3" strokeWidth={3} />
+              </span>
+              <span className="text-foreground/80">{item.x}</span>
+            </li>
+          ) : (
+            <li key={i} className="leading-relaxed text-foreground/80">
+              {item.x}
+            </li>
+          ),
+        )}
       </ul>
     </section>
-  );
-}
-
-function ApplyDialog({
-  open,
-  onOpenChange,
-  title,
-  companyName,
-}: {
-  open: boolean;
-  onOpenChange: (o: boolean) => void;
-  title: string;
-  companyName: string;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-3xl sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="font-display text-3xl font-normal">Apply to {companyName}</DialogTitle>
-          <DialogDescription>{title}</DialogDescription>
-        </DialogHeader>
-        <form
-          className="mt-2 space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            onOpenChange(false);
-            toast.success("Application sent", { description: `${companyName} will be in touch soon.` });
-          }}
-        >
-          <Field label="Full name" name="name" placeholder="Alex Morgan" required />
-          <Field label="Email" name="email" type="email" placeholder="alex@email.com" required />
-          <Field label="Portfolio or LinkedIn" name="link" type="url" placeholder="https://" />
-          <label className="block">
-            <span className="text-sm font-medium">A short note (optional)</span>
-            <textarea
-              rows={3}
-              placeholder="Why this role?"
-              className="mt-1.5 w-full resize-none rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-foreground/40 focus:ring-2 focus:ring-ring/15"
-            />
-          </label>
-          <button type="submit" className="w-full rounded-full bg-primary px-5 py-3 font-semibold text-primary-foreground transition-transform hover:scale-[1.01]">
-            Send application
-          </button>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function Field({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <label className="block">
-      <span className="text-sm font-medium">{label}</span>
-      <input
-        {...props}
-        className="mt-1.5 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-foreground/40 focus:ring-2 focus:ring-ring/15"
-      />
-    </label>
   );
 }

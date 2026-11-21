@@ -1,13 +1,18 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { SlidersHorizontal, X, SearchX, Sparkles, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { SearchBar } from "@/components/site/search-bar";
 import { JobCard } from "@/components/site/job-card";
-import { categories, filterJobs, jobs, jobTypes, levels, type JobType, type Level } from "@/lib/jobs";
+import { ResumeUpload } from "@/components/site/resume-upload";
+import { categories, jobTypes, levels, type JobType, type Level } from "@/lib/jobs";
+import { scrapeStatus, startScrape, useInfiniteJobs, useRegions } from "@/lib/api";
+import { regionId, useRegion } from "@/lib/use-region";
+import { useResume } from "@/lib/use-resume";
 import { cn } from "@/lib/utils";
 
-type Sort = "newest" | "salary";
+type Sort = "newest" | "salary" | "match";
 
 export interface JobsSearch {
   q?: string | undefined;
@@ -24,17 +29,16 @@ const str = (v: unknown) => (typeof v === "string" && v.trim() ? v : undefined);
 
 export const Route = createFileRoute("/jobs/")({
   validateSearch: (s: Record<string, unknown>): JobsSearch => {
-    const rawLoc = str(s["location"]);
-    const q = str(s["q"]);
     return {
-      q,
-      location: rawLoc === "all" ? "all" : (rawLoc ?? (q ? "all" : "India")),
+      q: str(s["q"]),
+      // No location in the URL means "use the region remembered on this device" (default Chennai).
+      location: str(s["location"]),
       category: str(s["category"]),
       types: Array.isArray(s["types"]) ? (s["types"].filter((t) => jobTypes.includes(t)) as JobType[]) : undefined,
       levels: Array.isArray(s["levels"]) ? (s["levels"].filter((l) => levels.includes(l)) as Level[]) : undefined,
       remote: s["remote"] === true || s["remote"] === "true" ? true : undefined,
       minSalary: typeof s["minSalary"] === "number" ? s["minSalary"] : undefined,
-      sort: s["sort"] === "salary" ? "salary" : undefined,
+      sort: s["sort"] === "salary" ? "salary" : s["sort"] === "match" ? "match" : undefined,
     };
   },
   head: () => ({
@@ -55,50 +59,74 @@ const salarySteps = [0, 6, 10, 15, 25, 40];
 function JobsPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
+  const queryClient = useQueryClient();
+  const { region, setRegion } = useRegion();
+  const { profile } = useResume();
+  const { data: regionData } = useRegions();
   const [showFilters, setShowFilters] = useState(false);
   const [isScraping, setIsScraping] = useState(false);
   const [scrapeMessage, setScrapeMessage] = useState<string | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Trigger real-time live web scraping when selecting specific Indian cities like Chennai
+  // A location in the URL is a region choice: remember it on this device.
   useEffect(() => {
-    if (search.location && search.location !== "all") {
-      const loc = search.location.trim();
-      setIsScraping(true);
-      fetch(`/api/scrape/location?location=${encodeURIComponent(loc)}`, { method: "POST" })
-        .then((res) => {
-          if (!res.ok) return null;
-          return res.json();
-        })
-        .then((data) => {
-          if (data && data.matching_count !== undefined) {
-            setScrapeMessage(`Scraped live: ${data.matching_count} verified opportunities in ${loc}`);
-            toast.success(`Live web scraper gathered latest real jobs for ${loc}!`);
-          }
-        })
-        .catch(() => {})
-        .finally(() => setIsScraping(false));
-    } else {
-      setScrapeMessage(null);
-    }
-  }, [search.location]);
+    if (search.location) setRegion(search.location === "all" ? "Global" : search.location);
+  }, [search.location, setRegion]);
+  useEffect(() => () => (pollRef.current ? clearInterval(pollRef.current) : undefined), []);
+
+  const location = search.location ? regionId(search.location) : region;
+  const locationLabel = regionData?.regions.find((r) => r.id === location)?.label ?? location;
+  const sort: Sort = search.sort === "match" && !profile ? "newest" : (search.sort ?? (profile ? "match" : "newest"));
+
+  const jobsQuery = useInfiniteJobs(
+    {
+      q: search.q,
+      location,
+      category: search.category,
+      remote: search.remote,
+      types: search.types,
+      levels: search.levels,
+      minSalary: search.minSalary,
+      sort,
+      pageSize: 30,
+    },
+    profile,
+  );
+  const first = jobsQuery.data?.pages[0];
+  const results = jobsQuery.data?.pages.flatMap((p) => p.jobs) ?? [];
+  const total = first?.total ?? 0;
 
   const update = (patch: Partial<JobsSearch>) =>
     navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true, resetScroll: false });
 
-  const results = useMemo(() => {
-    const list = filterJobs(jobs, {
-      q: search.q,
-      location: search.location,
-      category: search.category,
-      types: search.types,
-      levels: search.levels,
-      remoteOnly: search.remote,
-      minSalary: search.minSalary,
-    });
-    return [...list].sort((a, b) =>
-      search.sort === "salary" ? b.salaryMax - a.salaryMax : a.postedDaysAgo - b.postedDaysAgo,
-    );
-  }, [search]);
+  const runScrape = async () => {
+    setIsScraping(true);
+    setScrapeMessage(null);
+    try {
+      const { id } = await startScrape(location);
+      pollRef.current = setInterval(async () => {
+        try {
+          const run = await scrapeStatus(id);
+          const last = run.progress.at(-1)?.msg;
+          if (last) setScrapeMessage(last);
+          if (run.status !== "running") {
+            if (pollRef.current) clearInterval(pollRef.current);
+            setIsScraping(false);
+            await queryClient.invalidateQueries();
+            const n = run.stats.inserted ?? 0;
+            setScrapeMessage(`Scraped live: ${n} new verified ${n === 1 ? "opportunity" : "opportunities"} for ${locationLabel}`);
+            if (run.status === "done") toast.success(`Live scrape finished for ${locationLabel}`, { description: `${n} new, ${run.stats.updated ?? 0} updated, ${run.stats.closed ?? 0} closed` });
+            else toast.error("The scrape hit an error. Check the Sources page for details.");
+          }
+        } catch {
+          /* transient; keep polling */
+        }
+      }, 1500);
+    } catch (err) {
+      setIsScraping(false);
+      toast.error(err instanceof Error ? err.message : "Could not start a scrape");
+    }
+  };
 
   const activeCount =
     (search.category ? 1 : 0) +
@@ -112,8 +140,9 @@ function JobsPage() {
     return next.length ? next : undefined;
   };
 
-  const clearAll = () =>
-    navigate({ search: { q: search.q, location: "all" }, replace: true, resetScroll: false });
+  const clearAll = () => navigate({ search: { q: search.q, location: search.location }, replace: true, resetScroll: false });
+
+  const sorts: Sort[] = profile ? ["match", "newest", "salary"] : ["newest", "salary"];
 
   return (
     <div className="container-page pt-10 md:pt-14">
@@ -121,12 +150,17 @@ function JobsPage() {
       <p className="mt-2 text-muted-foreground">Search by title, skill or company — then narrow it down.</p>
 
       <SearchBar
-        key={`${search.q ?? ""}|${search.location ?? ""}`}
+        key={`${search.q ?? ""}|${location}`}
         className="mt-8"
         defaultQ={search.q}
-        defaultLocation={search.location}
-        onSearch={(q, location) => update({ q: q || undefined, location: location ? location : "all" })}
+        defaultLocation={location}
+        onSearch={(q, loc) => {
+          const id = regionId(loc || location);
+          setRegion(id);
+          update({ q: q || undefined, location: id });
+        }}
       />
+      <ResumeUpload className="mt-4" align="start" />
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[260px_1fr]">
         {/* Filters */}
@@ -209,13 +243,13 @@ function JobsPage() {
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">{results.length}</span>{" "}
-                {results.length === 1 ? "job" : "jobs"} found
+                <span className="font-semibold text-foreground">{total.toLocaleString("en-IN")}</span>{" "}
+                {total === 1 ? "job" : "jobs"} found
               </p>
               {isScraping && (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
                   <RefreshCw className="size-3 animate-spin" />
-                  Scraping web live for {search.location}...
+                  {scrapeMessage ?? `Scraping web live for ${locationLabel}...`}
                 </span>
               )}
               {!isScraping && scrapeMessage && (
@@ -237,26 +271,35 @@ function JobsPage() {
                 )}
               </button>
               <div className="inline-flex rounded-full border border-border bg-card p-1 text-sm">
-                {(["newest", "salary"] as const).map((s) => (
+                {sorts.map((s) => (
                   <button
                     key={s}
-                    onClick={() => update({ sort: s === "newest" ? undefined : s })}
+                    onClick={() => update({ sort: s })}
                     className={cn(
                       "rounded-full px-3 py-1.5 font-medium transition-colors",
-                      (search.sort ?? "newest") === s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+                      sort === s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
                     )}
                   >
-                    {s === "newest" ? "Newest" : "Top salary"}
+                    {s === "newest" ? "Newest" : s === "salary" ? "Top salary" : "Best match"}
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {(search.q || search.location || activeCount > 0) && (
+          {(search.q || location || activeCount > 0) && (
             <div className="mb-5 flex flex-wrap gap-2">
               {search.q && <ActiveTag onRemove={() => update({ q: undefined })}>“{search.q}”</ActiveTag>}
-              {search.location && search.location !== "all" && <ActiveTag onRemove={() => update({ location: "all" })}>{search.location}</ActiveTag>}
+              {location !== "Global" && (
+                <ActiveTag
+                  onRemove={() => {
+                    setRegion("Global");
+                    update({ location: "Global" });
+                  }}
+                >
+                  {locationLabel}
+                </ActiveTag>
+              )}
               {search.category && <ActiveTag onRemove={() => update({ category: undefined })}>{search.category}</ActiveTag>}
               {search.remote && <ActiveTag onRemove={() => update({ remote: undefined })}>Remote</ActiveTag>}
               {search.types?.map((t) => (
@@ -269,10 +312,31 @@ function JobsPage() {
             </div>
           )}
 
+          {first?.fallback && (
+            <p className="mb-4 text-sm text-muted-foreground">
+              Only {first.fallback.exact_count} matching {first.fallback.exact_count === 1 ? "role" : "roles"} in {locationLabel} right now, so we're also showing roles across India and remote-India.
+            </p>
+          )}
+
           {results.length > 0 ? (
             <div className="flex flex-col gap-3">
               {results.map((job) => (
                 <JobCard key={job.id} job={job} />
+              ))}
+              {jobsQuery.hasNextPage && (
+                <button
+                  onClick={() => jobsQuery.fetchNextPage()}
+                  disabled={jobsQuery.isFetchingNextPage}
+                  className="mx-auto mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold transition-colors hover:border-foreground/30 disabled:opacity-60"
+                >
+                  {jobsQuery.isFetchingNextPage ? "Loading..." : `Show more (${(total - results.length).toLocaleString("en-IN")} left)`}
+                </button>
+              )}
+            </div>
+          ) : jobsQuery.isPending ? (
+            <div className="flex flex-col gap-3" aria-busy>
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-28 animate-pulse rounded-2xl border border-border bg-card" />
               ))}
             </div>
           ) : (
@@ -281,23 +345,13 @@ function JobsPage() {
                 <SearchX className="size-5" />
               </span>
               <h3 className="mt-4 text-lg font-semibold">No local jobs match currently</h3>
-              <p className="mt-1 max-w-sm text-muted-foreground">Scrape the live web for verified opportunities in {search.location || "India"}.</p>
+              <p className="mt-1 max-w-sm text-muted-foreground">Scrape the live web for verified opportunities in {locationLabel}.</p>
               <button
-                onClick={() => {
-                  if (search.location) {
-                    setIsScraping(true);
-                    fetch(`/api/scrape/location?location=${encodeURIComponent(search.location)}`, { method: "POST" })
-                      .then((res) => res.json())
-                      .then(() => {
-                        toast.success(`Scraped web for ${search.location}!`);
-                        window.location.reload();
-                      })
-                      .finally(() => setIsScraping(false));
-                  }
-                }}
+                onClick={runScrape}
+                disabled={isScraping}
                 className="mt-6 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
               >
-                {isScraping ? "Scraping web..." : `Scrape live ${search.location || "India"} jobs now`}
+                {isScraping ? "Scraping web..." : `Scrape live ${locationLabel} jobs now`}
               </button>
             </div>
           )}
@@ -344,4 +398,3 @@ function ActiveTag({ children, onRemove }: { children: React.ReactNode; onRemove
     </span>
   );
 }
-

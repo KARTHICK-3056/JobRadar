@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useMemo, useEffect } from "react";
+import { useEffect } from "react";
 import {
   ArrowRight,
   Code2,
@@ -17,7 +17,11 @@ import {
 import { SearchBar } from "@/components/site/search-bar";
 import { JobCard } from "@/components/site/job-card";
 import { CompanyLogo } from "@/components/site/company-logo";
-import { categories, companies, jobs, filterJobs } from "@/lib/jobs";
+import { ResumeUpload } from "@/components/site/resume-upload";
+import { categories } from "@/lib/jobs";
+import { useCompanies, useJobs, useStats } from "@/lib/api";
+import { regionId, useRegion } from "@/lib/use-region";
+import { useResume } from "@/lib/use-resume";
 import { cn } from "@/lib/utils";
 
 interface IndexSearch {
@@ -65,33 +69,31 @@ const MAJOR_HUBS = [
 
 const popular = ["Bengaluru", "Chennai", "Hyderabad", "Pune", "Mumbai", "Delhi-NCR", "Remote"];
 
+// UI labels for hubs -> API region ids
+const HUB_ID: Record<string, string> = { "All India": "India", "Delhi-NCR": "Delhi NCR" };
+const hubLabel = (id: string) => (id === "India" ? "All India" : id === "Delhi NCR" ? "Delhi-NCR" : id);
+
 function Index() {
   const search = Route.useSearch();
   const navigate = useNavigate();
-  const [selectedLocation, setSelectedLocation] = useState<string>(search.location || "All India");
+  const { region, setRegion } = useRegion();
+  const { profile } = useResume();
+  const selectedLocation = hubLabel(region);
 
-  // Keep state synchronized if URL search param changes
+  // A ?location= link selects that region (and is remembered like any other choice)
   useEffect(() => {
-    if (search.location) {
-      setSelectedLocation(search.location);
-    }
-  }, [search.location]);
+    if (search.location) setRegion(search.location);
+  }, [search.location, setRegion]);
 
-  // Filter jobs based on active location
-  const filteredJobs = useMemo(() => {
-    const loc = selectedLocation === "All India" ? "India" : selectedLocation;
-    const list = filterJobs(jobs, { location: loc });
-    return [...list].sort((a, b) => a.postedDaysAgo - b.postedDaysAgo);
-  }, [selectedLocation]);
+  const stats = useStats(region);
+  const latest = useJobs({ location: region, pageSize: 6, sort: profile ? "match" : undefined }, profile);
+  const hiring = useCompanies(region, 6);
+  const featured = latest.data?.jobs ?? [];
+  const regionTotal = stats.data?.total ?? latest.data?.total ?? 0;
+  const isGlobal = region === "Global";
 
-  const featured = useMemo(() => {
-    return filteredJobs.slice(0, 6);
-  }, [filteredJobs]);
-
-  const getHubCount = (hub: string) => {
-    const loc = hub === "All India" ? "India" : hub;
-    return filterJobs(jobs, { location: loc }).length;
-  };
+  const getHubCount = (hub: string) => stats.data?.hub_counts[HUB_ID[hub] ?? hub] ?? 0;
+  const setSelectedLocation = (hub: string) => setRegion(HUB_ID[hub] ?? hub);
 
   const handleSelectCity = (city: string) => {
     setSelectedLocation(city);
@@ -110,7 +112,7 @@ function Index() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="animate-rise inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-soft">
               <span className="size-1.5 rounded-full bg-highlight ring-4 ring-highlight/30" />
-              {jobs.length} live verified roles tracked
+              {stats.data ? regionTotal.toLocaleString("en-IN") : "…"} live verified roles tracked
             </span>
             <h1 className="animate-rise mt-6 font-display text-5xl leading-[1.02] text-foreground [animation-delay:80ms] sm:text-6xl md:text-7xl">
               Find work that <em className="marker-highlight italic">fits</em> your life.
@@ -122,25 +124,26 @@ function Index() {
 
           <div className="animate-rise relative z-30 mx-auto mt-10 max-w-3xl [animation-delay:240ms]">
             <SearchBar
-              key={selectedLocation}
-              defaultLocation={selectedLocation === "All India" ? "India" : selectedLocation}
+              key={region}
+              defaultLocation={region}
               className="relative z-30"
               onSearch={(q, location) => {
+                const loc = regionId(location || region);
+                setRegion(loc);
                 navigate({
                   to: "/jobs",
                   search: {
                     q: q || undefined,
-                    location: location || "India",
+                    location: loc,
                   },
                 });
               }}
             />
+            <ResumeUpload className="relative z-10 mt-4" />
             <div className="relative z-10 mt-5 flex flex-wrap items-center justify-center gap-2 text-sm">
               <span className="text-muted-foreground">Major Cities:</span>
               {popular.map((term) => {
-                const isCurrent =
-                  selectedLocation.toLowerCase() === term.toLowerCase() ||
-                  (term === "India" && selectedLocation === "All India");
+                const isCurrent = regionId(HUB_ID[term] ?? term).toLowerCase() === region.toLowerCase();
                 return (
                   <button
                     key={term}
@@ -166,9 +169,9 @@ function Index() {
               Hiring now
             </p>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
-              {companies.slice(0, 6).map((c) => (
+              {(hiring.data?.companies ?? []).map((c) => (
                 <div key={c.id} className="flex items-center gap-2 text-muted-foreground">
-                  <CompanyLogo company={c} size="sm" />
+                  <CompanyLogo company={{ name: c.name, tone: c.tone }} size="sm" />
                   <span className="font-semibold">{c.name}</span>
                 </div>
               ))}
@@ -183,7 +186,7 @@ function Index() {
         <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {categories.map((cat) => {
             const Icon = categoryIcons[cat.icon];
-            const count = jobs.filter((j) => j.category === cat.name).length;
+            const count = stats.data?.categories[cat.name] ?? 0;
             return (
               <Link
                 key={cat.name}
@@ -210,7 +213,7 @@ function Index() {
             </span>
             <div>
               <p className="font-semibold">Everything</p>
-              <p className="text-sm text-primary-foreground/70">{jobs.length} roles</p>
+              <p className="text-sm text-primary-foreground/70">{regionTotal.toLocaleString("en-IN")} roles</p>
             </div>
           </Link>
         </div>
@@ -224,15 +227,15 @@ function Index() {
               Fresh opportunities • {selectedLocation}
             </p>
             <h2 className="mt-2 font-display text-4xl md:text-5xl">
-              Latest opportunities {selectedLocation !== "All India" ? `in ${selectedLocation}` : "across India"}
+              Latest opportunities {isGlobal ? "worldwide" : selectedLocation !== "All India" ? `in ${selectedLocation}` : "across India"}
             </h2>
           </div>
           <Link
             to="/jobs"
-            search={{ location: selectedLocation === "All India" ? "India" : selectedLocation }}
+            search={{ location: region }}
             className="group hidden items-center gap-1.5 text-sm font-semibold sm:inline-flex"
           >
-            See all in {selectedLocation} ({filteredJobs.length})
+            See all in {selectedLocation} ({(latest.data?.total ?? 0).toLocaleString("en-IN")})
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
@@ -241,9 +244,7 @@ function Index() {
         <div className="mt-6 flex flex-wrap items-center gap-2">
           {MAJOR_HUBS.map((hub) => {
             const count = getHubCount(hub);
-            const isSelected =
-              selectedLocation.toLowerCase() === hub.toLowerCase() ||
-              (hub === "All India" && selectedLocation === "India");
+            const isSelected = (HUB_ID[hub] ?? hub).toLowerCase() === region.toLowerCase();
             return (
               <button
                 key={hub}
@@ -272,12 +273,18 @@ function Index() {
           })}
         </div>
 
+        {latest.data?.fallback && (
+          <p className="mt-4 text-sm text-muted-foreground">
+            Only {latest.data.fallback.exact_count} live {latest.data.fallback.exact_count === 1 ? "role" : "roles"} in {selectedLocation} right now, so we're also showing roles across India and remote-India.
+          </p>
+        )}
+
         {/* Opportunity Cards */}
         <div className="mt-6 flex flex-col gap-3">
           {featured.map((job) => (
             <JobCard key={job.id} job={job} />
           ))}
-          {featured.length === 0 && (
+          {featured.length === 0 && !latest.isPending && (
             <div className="rounded-2xl border border-dashed border-border bg-card/60 p-12 text-center">
               <MapPin className="mx-auto size-8 text-muted-foreground" />
               <h3 className="mt-3 text-lg font-semibold">No active listings in {selectedLocation} right now</h3>
@@ -296,10 +303,10 @@ function Index() {
         <div className="mt-6 text-center sm:hidden">
           <Link
             to="/jobs"
-            search={{ location: selectedLocation === "All India" ? "India" : selectedLocation }}
+            search={{ location: region }}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary"
           >
-            See all {filteredJobs.length} opportunities in {selectedLocation} &rarr;
+            See all {latest.data?.total ?? 0} opportunities in {selectedLocation} &rarr;
           </Link>
         </div>
       </section>
@@ -333,7 +340,7 @@ function Index() {
           </p>
           <Link
             to="/jobs"
-            search={{ location: "India" }}
+            search={{ location: region }}
             className="relative mt-8 inline-flex items-center gap-2 rounded-full bg-highlight px-7 py-3.5 font-semibold text-highlight-foreground transition-transform hover:scale-[1.03]"
           >
             Browse all jobs <ArrowRight className="size-4" />

@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Bookmark } from "lucide-react";
 import { JobCard } from "@/components/site/job-card";
-import { jobs } from "@/lib/jobs";
+import { useJobs } from "@/lib/api";
+import { useRegion } from "@/lib/use-region";
 import { useSavedJobs } from "@/lib/use-saved-jobs";
 
 export const Route = createFileRoute("/saved")({
@@ -20,7 +21,9 @@ export const Route = createFileRoute("/saved")({
 
 function SavedPage() {
   const { saved } = useSavedJobs();
-  const list = jobs.filter((j) => saved.includes(j.id));
+  const { region } = useRegion();
+  const { data } = useJobs({ ids: saved, location: region, pageSize: 100 }, null, saved.length > 0);
+  const list = saved.length ? (data?.jobs ?? []) : [];
 
   return (
     <div className="container-page pt-10 md:pt-14">

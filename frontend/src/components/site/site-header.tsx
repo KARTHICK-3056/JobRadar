@@ -8,6 +8,7 @@ const nav = [
   { to: "/jobs", label: "Find jobs" },
   { to: "/companies", label: "Companies" },
   { to: "/saved", label: "Saved" },
+  { to: "/sources", label: "Sources" },
 ] as const;
 
 export function SiteHeader() {
@@ -29,7 +30,6 @@ export function SiteHeader() {
             <Link
               key={item.to}
               to={item.to}
-              search={item.to === "/jobs" ? { location: "India" } : undefined}
               className="relative rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               activeProps={{ className: "text-foreground bg-muted" }}
             >
@@ -46,7 +46,6 @@ export function SiteHeader() {
         <div className="hidden items-center gap-2 md:flex">
           <Link
             to="/jobs"
-            search={{ location: "India" }}
             className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.03] active:scale-100"
           >
             Start searching
@@ -70,7 +69,6 @@ export function SiteHeader() {
             <Link
               key={item.to}
               to={item.to}
-              search={item.to === "/jobs" ? { location: "India" } : undefined}
               onClick={() => setOpen(false)}
               className="flex items-center justify-between rounded-xl px-3 py-3 text-base font-medium"
               activeProps={{ className: "bg-muted" }}

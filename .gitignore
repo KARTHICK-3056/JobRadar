@@ -1,55 +1,23 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-/lib/
-/lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+# Dependencies
+node_modules/
 
-# Virtual Environment
-venv/
-ENV/
-.venv
-
-# SQLite
+# Local data (SQLite DB, WAL files)
+data/
 *.db
-*.sqlite
-*.sqlite3
 *.db-shm
 *.db-wal
+*.sqlite
 
-# Test & coverage
-.pytest_cache/
-.coverage
-htmlcov/
-junit.xml
+# Env
+.env
 
-# Logs & temp
+# Logs & OS
 *.log
 .DS_Store
 Thumbs.db
 
-# Frontend
-node_modules/
+# Frontend build output
 .output/
 .nitro/
 dist/
 .wrangler/
-
-
-
